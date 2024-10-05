@@ -1,0 +1,14 @@
+[package]
+name = "cbindgen-bindgen"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+description = "Builds a binary of cbindgen for use in the xcframework build"
+
+[dependencies]
+cbindgen = "0.26.0"
+
+[[bin]]
+name = "cbindgen-bindgen"
+path = "bin/cbindgen-bindgen.rs"

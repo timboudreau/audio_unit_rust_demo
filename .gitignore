@@ -1,0 +1,35 @@
+*.keep
+*.tmp
+*.orig
+.DS_Store
+*.orig
+*.tmp
+~*
+*.udl
+*.diff
+
+# IDE metadata
+.idea/
+.lapce/
+project.xcworkspace/xcuserdata/**
+xcuserdata/
+*.xcuserstate
+
+
+# Build dirs and user specific stuff
+macos/tmp
+target/
+build/
+Build/
+DerivedData/
+/macos/headers
+/macos/xcframeworks
+/macos/libs
+/macos/packaging
+/macos/packaged
+/macos/packages
+
+# Generated
+/bin
+build_info.rs
+

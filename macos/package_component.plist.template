@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>BundleHasStrictIdentifier</key>
+		<true/>
+		<key>BundleIsRelocatable</key>
+		<true/>
+		<key>BundleIsVersionChecked</key>
+		<true/>
+		<key>BundleOverwriteAction</key>
+		<string>upgrade</string>
+		<key>ChildBundles</key>
+		<array>
+			<dict>
+				<key>BundleOverwriteAction</key>
+				<string>upgrade</string>
+				<key>ChildBundles</key>
+				<array>
+					<dict>
+						<key>BundleOverwriteAction</key>
+						<string>upgrade</string>
+						<key>RootRelativeBundlePath</key>
+						<string>PROJECT_NAME.app/Contents/PlugIns/EXTENSION_NAME.appex/Contents/Frameworks/FRAMEWORK_NAME.framework</string>
+					</dict>
+				</array>
+				<key>RootRelativeBundlePath</key>
+				<string>PROJECT_NAME.app/Contents/PlugIns/EXTENSION_NAME.appex</string>
+			</dict>
+			<dict>
+				<key>BundleOverwriteAction</key>
+				<string>upgrade</string>
+				<key>RootRelativeBundlePath</key>
+				<!-- XXX - this should be under PlugIns/$PLUGIN/Contents/Frameworks, right? -->
+				<string>PROJECT_NAME.app/Contents/Frameworks/FRAMEWORK_NAME.framework</string>
+			</dict>
+		</array>
+		<key>RootRelativeBundlePath</key>
+		<string>PROJECT_NAME.app</string>
+	</dict>
+</array>
+</plist>

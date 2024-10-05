@@ -1,0 +1,781 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		228F65A12CA3BA1300129549 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65A02CA3BA1300129549 /* ContentView.swift */; };
+		228F65A52CA3BA1300129549 /* ViewControllerRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65A42CA3BA1300129549 /* ViewControllerRepresentable.swift */; };
+		228F65A82CA3BA1300129549 /* Synth.aif in Resources */ = {isa = PBXBuildFile; fileRef = 228F65A72CA3BA1300129549 /* Synth.aif */; };
+		228F65AA2CA3BA1300129549 /* SimplePlayEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65A92CA3BA1300129549 /* SimplePlayEngine.swift */; };
+		228F65AD2CA3BA1300129549 /* MIDIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65AC2CA3BA1300129549 /* MIDIManager.swift */; };
+		228F65AF2CA3BA1300129549 /* TypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65AE2CA3BA1300129549 /* TypeAliases.swift */; };
+		228F65B22CA3BA1300129549 /* StringHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65B12CA3BA1300129549 /* StringHelpers.swift */; };
+		228F65B52CA3BA1300129549 /* AudioUnitHostModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65B42CA3BA1300129549 /* AudioUnitHostModel.swift */; };
+		228F65B72CA3BA1300129549 /* AudioUnitViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65B62CA3BA1300129549 /* AudioUnitViewModel.swift */; };
+		228F65B92CA3BA1300129549 /* RustDspPlainDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65B82CA3BA1300129549 /* RustDspPlainDemoApp.swift */; };
+		228F65BC2CA3BA1300129549 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228F65BB2CA3BA1300129549 /* Preview Assets.xcassets */; };
+		228F65BE2CA3BA1600129549 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228F65BD2CA3BA1600129549 /* Assets.xcassets */; };
+		228F65C52CA3BA1600129549 /* RustDspPlainDemoExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 228F65C42CA3BA1600129549 /* RustDspPlainDemoExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		228F65CF2CA3BA1600129549 /* ParameterSpecBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65CE2CA3BA1600129549 /* ParameterSpecBase.swift */; };
+		228F65D22CA3BA1600129549 /* CrossPlatform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65D12CA3BA1600129549 /* CrossPlatform.swift */; };
+		228F65D42CA3BA1600129549 /* String+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65D32CA3BA1600129549 /* String+Utils.swift */; };
+		228F65D82CA3BA1600129549 /* RustDspPlainDemoExtensionAudioUnit.mm in Sources */ = {isa = PBXBuildFile; fileRef = 228F65D72CA3BA1600129549 /* RustDspPlainDemoExtensionAudioUnit.mm */; };
+		228F65DB2CA3BA1600129549 /* RustDspPlainDemoExtensionAUProcessHelper.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 228F65DA2CA3BA1600129549 /* RustDspPlainDemoExtensionAUProcessHelper.hpp */; };
+		228F65DD2CA3BA1600129549 /* RustDspPlainDemoExtensionBufferedAudioBus.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 228F65DC2CA3BA1600129549 /* RustDspPlainDemoExtensionBufferedAudioBus.hpp */; };
+		228F65E12CA3BA1600129549 /* Parameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65E02CA3BA1600129549 /* Parameters.swift */; };
+		228F65E42CA3BA1600129549 /* RustDspPlainDemoExtensionDSPKernel.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 228F65E32CA3BA1600129549 /* RustDspPlainDemoExtensionDSPKernel.hpp */; };
+		228F65E72CA3BA1600129549 /* RustDspPlainDemoExtensionMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65E62CA3BA1600129549 /* RustDspPlainDemoExtensionMainView.swift */; };
+		228F65E92CA3BA1600129549 /* ParameterSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65E82CA3BA1600129549 /* ParameterSlider.swift */; };
+		228F65EE2CA3BA1600129549 /* AudioUnitViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 228F65EC2CA3BA1600129549 /* AudioUnitViewController.xib */; };
+		228F65F02CA3BA1600129549 /* ObservableAUParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65EF2CA3BA1600129549 /* ObservableAUParameter.swift */; };
+		228F65F22CA3BA1600129549 /* AudioUnitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228F65F12CA3BA1600129549 /* AudioUnitViewController.swift */; };
+		228F65FF2CA3BA7F00129549 /* mock_dsp_lib.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 228F65FE2CA3BA7F00129549 /* mock_dsp_lib.xcframework */; };
+		228F66002CA3BA7F00129549 /* mock_dsp_lib.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 228F65FE2CA3BA7F00129549 /* mock_dsp_lib.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		228F65C62CA3BA1600129549 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 228F65952CA3BA1300129549 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 228F65C32CA3BA1600129549;
+			remoteInfo = RustDspPlainDemoExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		228F65F92CA3BA1600129549 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				228F65C52CA3BA1600129549 /* RustDspPlainDemoExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		228F66012CA3BA7F00129549 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				228F66002CA3BA7F00129549 /* mock_dsp_lib.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		228F659D2CA3BA1300129549 /* RustDspPlainDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RustDspPlainDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		228F65A02CA3BA1300129549 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		228F65A42CA3BA1300129549 /* ViewControllerRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerRepresentable.swift; sourceTree = "<group>"; };
+		228F65A72CA3BA1300129549 /* Synth.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = Synth.aif; sourceTree = "<group>"; };
+		228F65A92CA3BA1300129549 /* SimplePlayEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplePlayEngine.swift; sourceTree = "<group>"; };
+		228F65AC2CA3BA1300129549 /* MIDIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MIDIManager.swift; sourceTree = "<group>"; };
+		228F65AE2CA3BA1300129549 /* TypeAliases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeAliases.swift; sourceTree = "<group>"; };
+		228F65B12CA3BA1300129549 /* StringHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringHelpers.swift; sourceTree = "<group>"; };
+		228F65B42CA3BA1300129549 /* AudioUnitHostModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioUnitHostModel.swift; sourceTree = "<group>"; };
+		228F65B62CA3BA1300129549 /* AudioUnitViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioUnitViewModel.swift; sourceTree = "<group>"; };
+		228F65B82CA3BA1300129549 /* RustDspPlainDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RustDspPlainDemoApp.swift; sourceTree = "<group>"; };
+		228F65BB2CA3BA1300129549 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		228F65BD2CA3BA1600129549 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		228F65BF2CA3BA1600129549 /* RustDspPlainDemo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RustDspPlainDemo.entitlements; sourceTree = "<group>"; };
+		228F65C42CA3BA1600129549 /* RustDspPlainDemoExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RustDspPlainDemoExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		228F65CC2CA3BA1600129549 /* RustDspPlainDemoExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RustDspPlainDemoExtension-Bridging-Header.h"; sourceTree = "<group>"; };
+		228F65CE2CA3BA1600129549 /* ParameterSpecBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterSpecBase.swift; sourceTree = "<group>"; };
+		228F65D12CA3BA1600129549 /* CrossPlatform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPlatform.swift; sourceTree = "<group>"; };
+		228F65D32CA3BA1600129549 /* String+Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Utils.swift"; sourceTree = "<group>"; };
+		228F65D62CA3BA1600129549 /* RustDspPlainDemoExtensionAudioUnit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RustDspPlainDemoExtensionAudioUnit.h; sourceTree = "<group>"; };
+		228F65D72CA3BA1600129549 /* RustDspPlainDemoExtensionAudioUnit.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RustDspPlainDemoExtensionAudioUnit.mm; sourceTree = "<group>"; };
+		228F65DA2CA3BA1600129549 /* RustDspPlainDemoExtensionAUProcessHelper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RustDspPlainDemoExtensionAUProcessHelper.hpp; sourceTree = "<group>"; };
+		228F65DC2CA3BA1600129549 /* RustDspPlainDemoExtensionBufferedAudioBus.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RustDspPlainDemoExtensionBufferedAudioBus.hpp; sourceTree = "<group>"; };
+		228F65DF2CA3BA1600129549 /* RustDspPlainDemoExtensionParameterAddresses.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RustDspPlainDemoExtensionParameterAddresses.h; sourceTree = "<group>"; };
+		228F65E02CA3BA1600129549 /* Parameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parameters.swift; sourceTree = "<group>"; };
+		228F65E32CA3BA1600129549 /* RustDspPlainDemoExtensionDSPKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RustDspPlainDemoExtensionDSPKernel.hpp; sourceTree = "<group>"; };
+		228F65E62CA3BA1600129549 /* RustDspPlainDemoExtensionMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RustDspPlainDemoExtensionMainView.swift; sourceTree = "<group>"; };
+		228F65E82CA3BA1600129549 /* ParameterSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterSlider.swift; sourceTree = "<group>"; };
+		228F65ED2CA3BA1600129549 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = AudioUnitViewController.xib; sourceTree = "<group>"; };
+		228F65EF2CA3BA1600129549 /* ObservableAUParameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableAUParameter.swift; sourceTree = "<group>"; };
+		228F65F12CA3BA1600129549 /* AudioUnitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioUnitViewController.swift; sourceTree = "<group>"; };
+		228F65F32CA3BA1600129549 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		228F65FE2CA3BA7F00129549 /* mock_dsp_lib.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = mock_dsp_lib.xcframework; path = ../xcframeworks/mock_dsp_lib/mock_dsp_lib.xcframework; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		228F659A2CA3BA1300129549 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		228F65C12CA3BA1600129549 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				228F65FF2CA3BA7F00129549 /* mock_dsp_lib.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		228F65942CA3BA1300129549 = {
+			isa = PBXGroup;
+			children = (
+				228F659F2CA3BA1300129549 /* RustDspPlainDemo */,
+				228F65C82CA3BA1600129549 /* RustDspPlainDemoExtension */,
+				228F659E2CA3BA1300129549 /* Products */,
+				228F65FD2CA3BA7E00129549 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		228F659E2CA3BA1300129549 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				228F659D2CA3BA1300129549 /* RustDspPlainDemo.app */,
+				228F65C42CA3BA1600129549 /* RustDspPlainDemoExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		228F659F2CA3BA1300129549 /* RustDspPlainDemo */ = {
+			isa = PBXGroup;
+			children = (
+				228F65A02CA3BA1300129549 /* ContentView.swift */,
+				228F65B82CA3BA1300129549 /* RustDspPlainDemoApp.swift */,
+				228F65BD2CA3BA1600129549 /* Assets.xcassets */,
+				228F65BF2CA3BA1600129549 /* RustDspPlainDemo.entitlements */,
+				228F65A22CA3BA1300129549 /* Common */,
+				228F65B32CA3BA1300129549 /* Model */,
+				228F65BA2CA3BA1300129549 /* Preview Content */,
+			);
+			path = RustDspPlainDemo;
+			sourceTree = "<group>";
+		};
+		228F65A22CA3BA1300129549 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				228F65AE2CA3BA1300129549 /* TypeAliases.swift */,
+				228F65A32CA3BA1300129549 /* UI */,
+				228F65A62CA3BA1300129549 /* Audio */,
+				228F65AB2CA3BA1300129549 /* MIDI */,
+				228F65B02CA3BA1300129549 /* String */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		228F65A32CA3BA1300129549 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				228F65A42CA3BA1300129549 /* ViewControllerRepresentable.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		228F65A62CA3BA1300129549 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				228F65A72CA3BA1300129549 /* Synth.aif */,
+				228F65A92CA3BA1300129549 /* SimplePlayEngine.swift */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		228F65AB2CA3BA1300129549 /* MIDI */ = {
+			isa = PBXGroup;
+			children = (
+				228F65AC2CA3BA1300129549 /* MIDIManager.swift */,
+			);
+			path = MIDI;
+			sourceTree = "<group>";
+		};
+		228F65B02CA3BA1300129549 /* String */ = {
+			isa = PBXGroup;
+			children = (
+				228F65B12CA3BA1300129549 /* StringHelpers.swift */,
+			);
+			path = String;
+			sourceTree = "<group>";
+		};
+		228F65B32CA3BA1300129549 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				228F65B42CA3BA1300129549 /* AudioUnitHostModel.swift */,
+				228F65B62CA3BA1300129549 /* AudioUnitViewModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		228F65BA2CA3BA1300129549 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				228F65BB2CA3BA1300129549 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		228F65C82CA3BA1600129549 /* RustDspPlainDemoExtension */ = {
+			isa = PBXGroup;
+			children = (
+				228F65F32CA3BA1600129549 /* Info.plist */,
+				228F65CB2CA3BA1600129549 /* Common */,
+				228F65DE2CA3BA1600129549 /* Parameters */,
+				228F65E22CA3BA1600129549 /* DSP */,
+				228F65E52CA3BA1600129549 /* UI */,
+			);
+			path = RustDspPlainDemoExtension;
+			sourceTree = "<group>";
+		};
+		228F65CB2CA3BA1600129549 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				228F65CC2CA3BA1600129549 /* RustDspPlainDemoExtension-Bridging-Header.h */,
+				228F65CD2CA3BA1600129549 /* Parameters */,
+				228F65D02CA3BA1600129549 /* Utility */,
+				228F65D52CA3BA1600129549 /* Audio Unit */,
+				228F65D92CA3BA1600129549 /* DSP */,
+				228F65EA2CA3BA1600129549 /* UI */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		228F65CD2CA3BA1600129549 /* Parameters */ = {
+			isa = PBXGroup;
+			children = (
+				228F65CE2CA3BA1600129549 /* ParameterSpecBase.swift */,
+			);
+			path = Parameters;
+			sourceTree = "<group>";
+		};
+		228F65D02CA3BA1600129549 /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				228F65D12CA3BA1600129549 /* CrossPlatform.swift */,
+				228F65D32CA3BA1600129549 /* String+Utils.swift */,
+			);
+			path = Utility;
+			sourceTree = "<group>";
+		};
+		228F65D52CA3BA1600129549 /* Audio Unit */ = {
+			isa = PBXGroup;
+			children = (
+				228F65D62CA3BA1600129549 /* RustDspPlainDemoExtensionAudioUnit.h */,
+				228F65D72CA3BA1600129549 /* RustDspPlainDemoExtensionAudioUnit.mm */,
+			);
+			path = "Audio Unit";
+			sourceTree = "<group>";
+		};
+		228F65D92CA3BA1600129549 /* DSP */ = {
+			isa = PBXGroup;
+			children = (
+				228F65DA2CA3BA1600129549 /* RustDspPlainDemoExtensionAUProcessHelper.hpp */,
+				228F65DC2CA3BA1600129549 /* RustDspPlainDemoExtensionBufferedAudioBus.hpp */,
+			);
+			path = DSP;
+			sourceTree = "<group>";
+		};
+		228F65DE2CA3BA1600129549 /* Parameters */ = {
+			isa = PBXGroup;
+			children = (
+				228F65DF2CA3BA1600129549 /* RustDspPlainDemoExtensionParameterAddresses.h */,
+				228F65E02CA3BA1600129549 /* Parameters.swift */,
+			);
+			path = Parameters;
+			sourceTree = "<group>";
+		};
+		228F65E22CA3BA1600129549 /* DSP */ = {
+			isa = PBXGroup;
+			children = (
+				228F65E32CA3BA1600129549 /* RustDspPlainDemoExtensionDSPKernel.hpp */,
+			);
+			path = DSP;
+			sourceTree = "<group>";
+		};
+		228F65E52CA3BA1600129549 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				228F65E62CA3BA1600129549 /* RustDspPlainDemoExtensionMainView.swift */,
+				228F65E82CA3BA1600129549 /* ParameterSlider.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		228F65EA2CA3BA1600129549 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				228F65EF2CA3BA1600129549 /* ObservableAUParameter.swift */,
+				228F65F12CA3BA1600129549 /* AudioUnitViewController.swift */,
+				228F65EB2CA3BA1600129549 /* Base.lproj */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		228F65EB2CA3BA1600129549 /* Base.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				228F65EC2CA3BA1600129549 /* AudioUnitViewController.xib */,
+			);
+			path = Base.lproj;
+			sourceTree = "<group>";
+		};
+		228F65FD2CA3BA7E00129549 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				228F65FE2CA3BA7F00129549 /* mock_dsp_lib.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		228F659C2CA3BA1300129549 /* RustDspPlainDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 228F65FA2CA3BA1600129549 /* Build configuration list for PBXNativeTarget "RustDspPlainDemo" */;
+			buildPhases = (
+				228F65992CA3BA1300129549 /* Sources */,
+				228F659A2CA3BA1300129549 /* Frameworks */,
+				228F659B2CA3BA1300129549 /* Resources */,
+				228F65F92CA3BA1600129549 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				228F65C72CA3BA1600129549 /* PBXTargetDependency */,
+			);
+			name = RustDspPlainDemo;
+			productName = RustDspPlainDemo;
+			productReference = 228F659D2CA3BA1300129549 /* RustDspPlainDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		228F65C32CA3BA1600129549 /* RustDspPlainDemoExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 228F65F62CA3BA1600129549 /* Build configuration list for PBXNativeTarget "RustDspPlainDemoExtension" */;
+			buildPhases = (
+				228F65C02CA3BA1600129549 /* Sources */,
+				228F65C12CA3BA1600129549 /* Frameworks */,
+				228F65C22CA3BA1600129549 /* Resources */,
+				228F66012CA3BA7F00129549 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RustDspPlainDemoExtension;
+			productName = RustDspPlainDemoExtension;
+			productReference = 228F65C42CA3BA1600129549 /* RustDspPlainDemoExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		228F65952CA3BA1300129549 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					228F659C2CA3BA1300129549 = {
+						CreatedOnToolsVersion = 14.3.1;
+					};
+					228F65C32CA3BA1600129549 = {
+						CreatedOnToolsVersion = 14.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 228F65982CA3BA1300129549 /* Build configuration list for PBXProject "RustDspPlainDemo" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 228F65942CA3BA1300129549;
+			productRefGroup = 228F659E2CA3BA1300129549 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				228F659C2CA3BA1300129549 /* RustDspPlainDemo */,
+				228F65C32CA3BA1600129549 /* RustDspPlainDemoExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		228F659B2CA3BA1300129549 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				228F65BC2CA3BA1300129549 /* Preview Assets.xcassets in Resources */,
+				228F65BE2CA3BA1600129549 /* Assets.xcassets in Resources */,
+				228F65A82CA3BA1300129549 /* Synth.aif in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		228F65C22CA3BA1600129549 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				228F65DB2CA3BA1600129549 /* RustDspPlainDemoExtensionAUProcessHelper.hpp in Resources */,
+				228F65EE2CA3BA1600129549 /* AudioUnitViewController.xib in Resources */,
+				228F65DD2CA3BA1600129549 /* RustDspPlainDemoExtensionBufferedAudioBus.hpp in Resources */,
+				228F65E42CA3BA1600129549 /* RustDspPlainDemoExtensionDSPKernel.hpp in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		228F65992CA3BA1300129549 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				228F65B52CA3BA1300129549 /* AudioUnitHostModel.swift in Sources */,
+				228F65B72CA3BA1300129549 /* AudioUnitViewModel.swift in Sources */,
+				228F65A12CA3BA1300129549 /* ContentView.swift in Sources */,
+				228F65A52CA3BA1300129549 /* ViewControllerRepresentable.swift in Sources */,
+				228F65B22CA3BA1300129549 /* StringHelpers.swift in Sources */,
+				228F65AD2CA3BA1300129549 /* MIDIManager.swift in Sources */,
+				228F65B92CA3BA1300129549 /* RustDspPlainDemoApp.swift in Sources */,
+				228F65AF2CA3BA1300129549 /* TypeAliases.swift in Sources */,
+				228F65AA2CA3BA1300129549 /* SimplePlayEngine.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		228F65C02CA3BA1600129549 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				228F65E12CA3BA1600129549 /* Parameters.swift in Sources */,
+				228F65CF2CA3BA1600129549 /* ParameterSpecBase.swift in Sources */,
+				228F65F02CA3BA1600129549 /* ObservableAUParameter.swift in Sources */,
+				228F65D22CA3BA1600129549 /* CrossPlatform.swift in Sources */,
+				228F65D82CA3BA1600129549 /* RustDspPlainDemoExtensionAudioUnit.mm in Sources */,
+				228F65F22CA3BA1600129549 /* AudioUnitViewController.swift in Sources */,
+				228F65E92CA3BA1600129549 /* ParameterSlider.swift in Sources */,
+				228F65D42CA3BA1600129549 /* String+Utils.swift in Sources */,
+				228F65E72CA3BA1600129549 /* RustDspPlainDemoExtensionMainView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		228F65C72CA3BA1600129549 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 228F65C32CA3BA1600129549 /* RustDspPlainDemoExtension */;
+			targetProxy = 228F65C62CA3BA1600129549 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		228F65EC2CA3BA1600129549 /* AudioUnitViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				228F65ED2CA3BA1600129549 /* Base */,
+			);
+			name = AudioUnitViewController.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		228F65F42CA3BA1600129549 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		228F65F52CA3BA1600129549 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		228F65F72CA3BA1600129549 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QR6GT2TMG5;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RustDspPlainDemoExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RustDspPlainDemoExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "2024, Tim Boudreau, MIT license.  See LICENSE.txt.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_CODE_SIGN_FLAGS = "--deep";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mastfrog.RustDspPlainDemo.RustDspPlainDemoExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "RustDspPlainDemoExtension/Common/RustDspPlainDemoExtension-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		228F65F82CA3BA1600129549 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QR6GT2TMG5;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RustDspPlainDemoExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RustDspPlainDemoExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "2024, Tim Boudreau, MIT license.  See LICENSE.txt.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_CODE_SIGN_FLAGS = "--deep";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mastfrog.RustDspPlainDemo.RustDspPlainDemoExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "RustDspPlainDemoExtension/Common/RustDspPlainDemoExtension-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		228F65FB2CA3BA1600129549 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = RustDspPlainDemo/RustDspPlainDemo.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RustDspPlainDemo/Preview Content\"";
+				DEVELOPMENT_TEAM = QR6GT2TMG5;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = RustDspPlainDemo;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "2024, Tim Boudreau, MIT license.  See LICENSE.txt.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					AudioToolbox,
+					"-framework",
+					AVFoundation,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mastfrog.RustDspPlainDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		228F65FC2CA3BA1600129549 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = RustDspPlainDemo/RustDspPlainDemo.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RustDspPlainDemo/Preview Content\"";
+				DEVELOPMENT_TEAM = QR6GT2TMG5;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = RustDspPlainDemo;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "2024, Tim Boudreau, MIT license.  See LICENSE.txt.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					AudioToolbox,
+					"-framework",
+					AVFoundation,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mastfrog.RustDspPlainDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		228F65982CA3BA1300129549 /* Build configuration list for PBXProject "RustDspPlainDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				228F65F42CA3BA1600129549 /* Debug */,
+				228F65F52CA3BA1600129549 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		228F65F62CA3BA1600129549 /* Build configuration list for PBXNativeTarget "RustDspPlainDemoExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				228F65F72CA3BA1600129549 /* Debug */,
+				228F65F82CA3BA1600129549 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		228F65FA2CA3BA1600129549 /* Build configuration list for PBXNativeTarget "RustDspPlainDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				228F65FB2CA3BA1600129549 /* Debug */,
+				228F65FC2CA3BA1600129549 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 228F65952CA3BA1300129549 /* Project object */;
+}

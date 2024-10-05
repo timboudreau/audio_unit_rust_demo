@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# See https://developer.apple.com/library/archive/technotes/tn2339/_index.html
+
+
+
+ARCH=`uname -m`
+
+ROOT=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+PRJ="${ROOT}/macos"
+
+export ONLY_ACTIVE_ARCH=NO
+export ARCHS="x86_64 arm64"
+
+export BUILD_KIND="Release"
+
+declare -a projects=( "RustDspInProcessDemo" "RustDspPlainDemo" )
+
+for project in "${projects[@]}"
+do
+    PRJDIR="${PRJ}/${project}"
+    echo "******************************** Clean ${project} ********************************"
+    rm -Rf "${PRJDIR}/DerivedData"
+done
+
+for project in "${projects[@]}"
+do
+    echo "******************************** Find/build subframeworks in ${project} ********************************"
+    PRJDIR="${PRJ}/${project}"
+    cd "${PRJDIR}"
+    TARGET=`xcodebuild -list 2>/dev/null | grep UI | uniq | xargs`
+    if [ ! -z "${TARGET}" ]; then
+        echo "GOT ${TARGET} in ${project}"
+        xcodebuild build -configuration "${BUILD_KIND}" -scheme "${TARGET}" \
+            -allowProvisioningUpdates \
+            -allowProvisioningDeviceRegistration -workspace "${PRJDIR}/${project}.xcodeproj/project.xcworkspace"
+    fi
+    cd "${ROOT}"
+done
+
+set -e
+
+for project in "${projects[@]}"
+do
+    PRJDIR="${PRJ}/${project}"
+    echo
+    echo
+    echo "******************************** Build ${project} ********************************"
+    rm -Rf "${PRJDIR}/DerivedData"
+    echo "Running xcodebuild build ${WS_BUILD_ARGS} in ${PRJDIR}"
+    cd "${PRJDIR}"
+
+    xcodebuild build -configuration "${BUILD_KIND}" -scheme "${project}Extension" -allowProvisioningUpdates \
+        -allowProvisioningDeviceRegistration -workspace "${PRJDIR}/${project}.xcodeproj/project.xcworkspace"
+    xcodebuild build -configuration "${BUILD_KIND}" -scheme "${project}" -allowProvisioningUpdates \
+        -allowProvisioningDeviceRegistration -workspace "${PRJDIR}/${project}.xcodeproj/project.xcworkspace"
+    
+    cd "${ROOT}"
+done

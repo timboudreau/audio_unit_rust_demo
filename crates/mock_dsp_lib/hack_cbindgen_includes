@@ -1,0 +1,16 @@
+This marker file tells our cbindgen wrapper to replace, e.g.
+
+#include "foo.h"
+
+with
+
+#include <foo.h>
+
+because it appears that when used as Framework headers from a
+module map, Xcode wants C++ semantics, but we still need C semantics
+for functions that return structs.  So we generate that and then
+rewrite the includes to meet its expectations.
+
+There is probably some incantation of compiler config and cbindgen
+config that will avoid this, but it will do for now.
+

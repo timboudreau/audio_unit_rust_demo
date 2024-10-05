@@ -1,0 +1,10 @@
+#!/bin/bash
+
+ROOT=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+cd "${ROOT}"
+
+rm -Rf macos/libs/ macos/xcframeworks/ macos/swift/ macos/headers/ target/universal-*
+
+find ./macos/ -iname DerivedData | xargs rm -Rf
+

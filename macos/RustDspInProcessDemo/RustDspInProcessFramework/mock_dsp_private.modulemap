@@ -1,0 +1,4 @@
+framework module RustDspInProcessFramework_Private {
+    header "mock_dsp_lib.h"
+    export *
+}

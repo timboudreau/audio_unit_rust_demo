@@ -1,0 +1,282 @@
+#!/bin/bash
+
+set -e
+
+ROOT=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# Local env rustflags can cause unpleasant surprises
+unset RUSTFLAGS
+
+# We will build against the least version of the SDK for THIS version of Mac OS
+# found on the local machine:
+TARGET_MACOSX_VER="13"
+
+# Find the concrete sdk version - this is somewhat fragile:
+SDK_VER=$(xcodebuild -showsdks | grep macOS | grep -v Asset | grep "${TARGET_MACOSX_VER}" | sort | cut -b44- | tail -n1)
+
+# No SDK found - we will fail later if we don't abort here
+if [ -z "${SDK_VER}" ]; then
+    RUNNING_OS_VER=$(sw_vers --productVersion)
+    echo "No Mac OS X SDK Version ${TARGET_MACOSX_VER} found on this system."
+    echo "You can try changing TARGET_MACOSX_VER in this script to the high decimal"
+    echo "of '${RUNNING_OS_VER}', this machine's OS version, but your mileage may vary."
+    exit 1
+fi
+
+# Use what we found to locate the linker and set up variables used by other build steps:
+SDK_ID="macosx${SDK_VER}"
+SDKROOT=$(xcrun -sdk ${SDK_ID} --show-sdk-path)
+export MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk ${SDK_ID} --show-sdk-platform-version)
+XCODE_DIR="$(xcode-select -p)"
+LINKER_PATH="${XCODE_DIR}/usr/bin/ld"
+SDK_TARGET_VERSION="${MACOSX_DEPLOYMENT_TARGET}"
+
+# All of our output goes here - in directories for headers, libs, xcframeworks, which are cleaned
+# by the clean script.  It's useful to have isolated copies of these things if we need to examine them;
+# and some projects need explicit copies of the headers, which can be set as a recursive headers path
+# into ../headers
+OUTPUT_DIR="${ROOT}/macos"
+mkdir -p "${OUTPUT_DIR}"
+
+# Locations for build products under the output dir
+LIBS_DIR="${OUTPUT_DIR}/libs"
+HEADERS_DIR="${OUTPUT_DIR}/headers"
+XCFRAMEWORKS_ROOT="${OUTPUT_DIR}/xcframeworks"
+
+# These are probably dangerous, but build.
+EXPERIMENTAL_LLVM_FLAGS="-C llvm-args=--cost-kind=throughput -C llvm-args=--do-counter-promotion -C llvm-args=--enable-loop-simplifycfg-term-folding -C llvm-args=--enable-no-infs-fp-math -C llvm-args=--enable-no-nans-fp-math -C llvm-args=--enable-no-signed-zeros-fp-math -C llvm-args=--enable-no-trapping-fp-math -C llvm-args=--enable-split-loopiv-heuristic -C llvm-args=--enable-unsafe-fp-math -C llvm-args=--frame-pointer=none -C llvm-args=--tail-predication=enabled -C llvm-args=--tailcallopt"
+
+TOOLS_RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C link-dead-code=true"
+
+# See flukejones comment here and ignore the -s part which is a linux thing: https://github.com/japaric/xargo/issues/45
+LINKER_FLAGS="-C link-arg=-dead_strip -C link-arg=-export_dynamic -C link-arg=-mark_dead_strippable_dylib -C link-arg=-compatibility_version -C link-arg=${SDK_TARGET_VERSION} -C link-arg=-application_extension -C link-arg=-dead_strip_dylibs -C link-arg=-macos_version_min -C link-arg=${SDK_TARGET_VERSION}"
+
+# Common RUSTFLAGS
+BASE_RFLAGS="-C relocation-model=static -C embed-bitcode=no -C linker=${LINKER_PATH}"
+
+# Disable this for real releases - merged into RUSTFLAGS when building for the native host
+DEV_RUSTFLAGS="-C target-cpu=native"
+
+# We build all our binaries for both architectures in release mode
+RELEASE_RUSTFLAGS="${BASE_RFLAGS} ${LINKER_FLAGS} ${EXPERIMENTAL_LLVM_FLAGS}"
+
+# Hostflags for building for the platform we're running on - can use native CPU optionally,
+# without generating buckets of log spam about unknown compiler flags that only apply to x86.
+RELEASE_RUSTFLAGS_HOST="${RELEASE_RUSTFLAGS} ${DEV_RUSTFLAGS}"
+
+LIB_EXT="a"
+STATIC_LIB_EXT="a"
+
+# Pending: Abort on Linux
+
+ARM64_DIR="${ROOT}/target/aarch64-apple-darwin/release"
+X86_DIR="${ROOT}/target/x86_64-apple-darwin/release"
+
+EXE_BUILD_DIR="unset"
+MY_TARGET="unset"
+OTHER_TARGET="unset"
+if [[ "$HOSTTYPE" == "x86_64" ]]; then
+  EXE_BUILD_DIR="${X86_DIR}"
+  MY_TARGET="x86_64-apple-darwin"
+  OTHER_TARGET="aarch64-apple-darwin"
+else
+  EXE_BUILD_DIR="${ARM64_DIR}"
+  MY_TARGET="aarch64-apple-darwin"
+  OTHER_TARGET="x86_64-apple-darwin"
+fi
+
+HOST_RELEASE_BUILD_DIR="${ROOT}/target/${MY_TARGET}/release/"
+
+echo "********************************************************************************"
+echo "*"
+echo "* Building Rust audio libs with:"
+echo "*"
+echo "*  OUTPUT_DIR=${OUTPUT_DIR}"
+echo "*"
+echo "*  XCFRAMEWORKS_ROOT=${XCFRAMEWORKS_ROOT}"
+echo "*"
+echo "*  LIBS_DIR=${LIBS_DIR}"
+echo "*"
+echo "*  HEADERS_DIR=${HEADERS_DIR}"
+echo "*"
+echo "*  SDK_VER=${SDK_VER}"
+echo "*"
+echo "*  MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}"
+echo "*"
+echo "*  SDK_TARGET_VERSION=${SDK_TARGET_VERSION}"
+echo "*"
+echo "*  LINKER_PATH=${LINKER_PATH}"
+echo "*"
+echo "*  RUSTFLAGS=${RELEASE_RUSTFLAGS}"
+echo "*"
+echo "*  NATIVE_TARGET=${MY_TARGET}"
+echo "*"
+echo "* LINKER_FLAGS=${LINKER_FLAGS}"
+echo "*"
+echo "********************************************************************************"
+
+
+# --------------------- Generate build_info.rs files -----------------------
+
+BUILD_INFO_DEST="${ROOT}/crates/mock_dsp_lib/src/build_info.rs"
+
+echo "(Re)generating build info -> ${BUILD_INFO_DEST}"
+"${ROOT}/generate-git-info" > "${BUILD_INFO_DEST}"
+
+
+# --------------------- Rebuild the cbindgen if needed -----------------------
+#
+# We cache the binary in the gitignored $ROOT/bin, since it rarely changes and is VERY slow to build.
+# The `pristine` script will clean it out.
+
+CBINDGEN_BINARY="${EXE_BUILD_DIR}/cbindgen-bindgen"
+CBINDGEN_LOCAL_BINARY="${ROOT}/bin/cbindgen-bindgen"
+CBINDGEN_CRATE="${ROOT}/crates/cbindgen-bindgen"
+
+# Building cbindgen is *slow* - keep a locally built copy and only rebuild
+# it if absent - on version updates, delete bin/uniffi-bindgen-curve-app
+if [ -f "${CBINDGEN_LOCAL_BINARY}" ]; then
+    CBINDGEN_BINARY="${CBINDGEN_LOCAL_BINARY}"
+else
+    echo "cbindgen-bindgen not found at ${CBINDGEN_LOCAL_BINARY}. Building it. This will take a while."
+    mkdir -p "${ROOT}/bin"
+    echo Build cbindgen-bindgen
+    cd "${CBINDGEN_CRATE}" && RUSTFLAGS="${TOOLS_RUSTFLAGS}" \
+        cargo build --release --target="${MY_TARGET}"
+
+    cp "${CBINDGEN_BINARY}" "${CBINDGEN_LOCAL_BINARY}"
+    CBINDGEN_BINARY="${CBINDGEN_LOCAL_BINARY}"
+fi
+
+
+# -------------------------------- Generate C Headers -----------------------
+
+echo Generating C header files
+"${CBINDGEN_BINARY}"
+
+# Used by each task
+TMP_PLIST_NAME="Info.plist.munged"
+
+# Generic xcframwork building. Takes arguments of
+#  1. The library name (the name of the crate as it appears in its build product)
+#  2. (optional) The name of the crate if that differs - Cargo will swap _'s for -'s, so
+#     this is the name of the crate as it appears in its Cargo.toml
+#  3. (optional) Relative path to the crate in $ROOT/crates, if it is not an immediate child of it
+#  4. (optional) Feature flags (must start with -F) to build with
+#
+#  The xcframework will be signed if CODE_SIGN_ID is set.
+#
+build_one_xcframework() {
+    CURR_LIB_NAME="${1}"
+
+    # If the crate name has, say, hyphens but the crate name has underscores:
+    CURR_LIB_CRATE_NAME="${2:-$CURR_LIB_NAME}"
+
+    # Path to the lib crate - if unset, assume the lib name set above will exist under
+    # $ROOT/crates.
+    CURR_LIB_CRATE_SUBPATH="${3:-$CURR_LIB_CRATE_NAME}"
+
+    # CURR_LIB_FEATURES="-F oslog"
+    CURR_LIB_FEATURES="${4}"
+
+    XCFRAMEWORKS_CURR_LIB_PARENT="${XCFRAMEWORKS_ROOT}/${CURR_LIB_NAME}"
+
+    echo "---------------------------------------------------------------------"
+    echo "\nBuilding an XCFramework for ${CURR_LIB_NAME}"
+    echo " * Crate name: ${CURR_LIB_CRATE_NAME}"
+    echo " * Path (in crates/): ${CURR_LIB_CRATE_SUBPATH}"
+    echo " * Feature Flags: ${CURR_LIB_FEATURES}"
+
+    mkdir -p "${XCFRAMEWORKS_CURR_LIB_PARENT}"
+
+    CURR_LIB_LIBS_DIR="${LIBS_DIR}/${CURR_LIB_NAME}"
+
+    CURR_LIB_HEADERS_DIR="${HEADERS_DIR}/${CURR_LIB_NAME}"
+
+    echo "Build ${CURR_LIB_CRATE_NAME} for ${OTHER_TARGET}"
+    cd "${ROOT}/crates/${CURR_LIB_CRATE_SUBPATH}" && RUSTFLAGS="${RELEASE_RUSTFLAGS_HOST}" cargo build ${CURR_LIB_FEATURES} --release --target=$OTHER_TARGET
+
+    echo "Build ${CURR_LIB_CRATE_NAME} for ${MY_TARGET}"
+    cd "${ROOT}/crates/${CURR_LIB_CRATE_SUBPATH}" && RUSTFLAGS="${RELEASE_RUSTFLAGS}" cargo build ${CURR_LIB_FEATURES} --release --target=$MY_TARGET
+
+    UNIV_CURR_LIB_BINARY_DIR="${ROOT}/target/universal-${CURR_LIB_CRATE_NAME}"
+    mkdir -p "${UNIV_CURR_LIB_BINARY_DIR}"
+    rm -f "${UNIV_CURR_LIB_BINARY_DIR}/*"
+    mkdir -p "${UNIV_CURR_LIB_BINARY_DIR}"
+
+    CURR_LIB_LIB_RAW_NAME="lib${CURR_LIB_CRATE_NAME}"
+    CURR_LIB_LIB_NAME="${CURR_LIB_LIB_RAW_NAME}.${LIB_EXT}"
+
+    STATIC_CURR_LIB_LIB_NAME="${CURR_LIB_LIB_RAW_NAME}.${STATIC_LIB_EXT}"
+    CURR_LIB_UNIVERSAL_BINARY_LIB="${UNIV_CURR_LIB_BINARY_DIR}/${CURR_LIB_LIB_NAME}"
+    STATIC_CURR_LIB_UNIVERSAL_BINARY_LIB="${UNIV_CURR_LIB_BINARY_DIR}/${STATIC_CURR_LIB_LIB_NAME}"
+
+    echo "Creating universal binary for ${CURR_LIB_NAME}"
+
+    lipo -create -output "${STATIC_CURR_LIB_UNIVERSAL_BINARY_LIB}" \
+        "${ARM64_DIR}/${STATIC_CURR_LIB_LIB_NAME}" "${X86_DIR}/${STATIC_CURR_LIB_LIB_NAME}"
+
+    echo ********************************
+    echo "Move headers for ${CURR_LIB_NAME} to universal binary location"
+    echo
+
+    CURR_LIB_HEADERS_FILE_NAME="${CURR_LIB_NAME}.h"
+    CURR_LIB_HEADERS_FILE="${ROOT}/target/${MY_TARGET}/release/${CURR_LIB_HEADERS_FILE_NAME}"
+
+    CURR_LIB_XCFRAMEWORK="${XCFRAMEWORKS_CURR_LIB_PARENT}/${CURR_LIB_NAME}.xcframework"
+
+    rm -Rf "${CURR_LIB_XCFRAMEWORK}"
+
+    CURR_LIB_HEADERS="${UNIV_CURR_LIB_BINARY_DIR}/${CURR_LIB_NAME}.h"
+
+    cp "${CURR_LIB_HEADERS_FILE}" "${CURR_LIB_HEADERS}"
+
+    echo "Creating $CURR_LIB_XCFRAMEWORK"
+    xcodebuild -create-xcframework -library "${STATIC_CURR_LIB_UNIVERSAL_BINARY_LIB}" -headers "${CURR_LIB_HEADERS}" -output "${CURR_LIB_XCFRAMEWORK}"
+
+    # This is not strictly necessary, but harmless and useful if we ever include more
+    # than one library in an xcframework - originally added in the process of trying
+    # and failing to avoid module map collisions in Xcode.  Rename the headers directory
+    # inside the XCFramework to a library-specific name and update the Info.plist for
+    # the framework to reflect that.
+
+    XC_CURR_LIB_HEADERS_DIR_NAME="${CURR_LIB_NAME}_headers"
+
+    rm -f "${CURR_LIB_XCFRAMEWORK}/macos-arm64_x86_64/Headers"
+    mkdir -p "${CURR_LIB_XCFRAMEWORK}/macos-arm64_x86_64/${XC_CURR_LIB_HEADERS_DIR_NAME}"
+    cp "${CURR_LIB_HEADERS}" "${CURR_LIB_XCFRAMEWORK}/macos-arm64_x86_64/${XC_CURR_LIB_HEADERS_DIR_NAME}/${CURR_LIB_NAME}.h"
+
+    INFO_PLIST="${CURR_LIB_XCFRAMEWORK}/Info.plist"
+    TMP_PLIST="${CURR_LIB_XCFRAMEWORK}/${TMP_PLIST_NAME}"
+
+    CURR_LIB_SED_ARG="s^<string>Headers</string>^<string>${XC_CURR_LIB_HEADERS_DIR_NAME}</string>^g"
+
+    cat "${INFO_PLIST}" | sed -e "${CURR_LIB_SED_ARG}" > "${TMP_PLIST}"
+    mv "${TMP_PLIST}" "${INFO_PLIST}"
+
+    # Copy headers and libs to a separate location for projects that want to directly reference them:
+    mkdir -p "${CURR_LIB_HEADERS_DIR}"
+    rm -f "${CURR_LIB_HEADERS_DIR}/*"
+    cp "${CURR_LIB_HEADERS}" "${CURR_LIB_HEADERS_DIR}/${CURR_LIB_NAME}.h"
+
+    mkdir -p "${CURR_LIB_LIBS_DIR}"
+    rm -f "${CURR_LIB_LIBS_DIR}/*"
+    cp "${STATIC_CURR_LIB_UNIVERSAL_BINARY_LIB}" "${CURR_LIB_LIBS_DIR}/"
+
+    # Since it will be statically linked into another binary, signing the xcframework is
+    # optional, but include the possibility of it for completeness.
+    if [[ -z "${CODE_SIGN_ID}" ]]; then
+        echo "CODE_SIGN_ID not set - not signing ${CURR_LIB_XCFRAMEWORK}"
+    else
+        echo "Signing ${CURR_LIB_XCFRAMEWORK}"
+        codesign --timestamp -v --sign "${CODE_SIGN_ID}" "${CURR_LIB_XCFRAMEWORK}"    
+    fi
+}
+
+
+# From here, we build xcframeworks - simply copy/paste a stanza for one and search and replace
+# the variable prefix and update the library name.
+
+# -------------------------------- The Mock DSP Lib XCFramework -----------------------
+
+build_one_xcframework mock_dsp_lib

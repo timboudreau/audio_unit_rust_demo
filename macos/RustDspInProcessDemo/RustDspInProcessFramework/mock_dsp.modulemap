@@ -1,0 +1,6 @@
+framework module RustDspInProcessFramework {
+    umbrella header "RustDspInProcessFramework.h"
+    header "RustDspInProcessDemoExtensionParameterAddresses.h"
+    header "RustDspInProcessDemoExtensionAudioUnit.h"
+    export *
+}

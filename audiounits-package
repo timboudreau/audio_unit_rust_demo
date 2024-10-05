@@ -1,0 +1,187 @@
+#!/bin/bash
+
+set -e
+
+ROOT=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+${ROOT}/tidy
+${ROOT}/build-xcframeworks
+# ${ROOT}/audiounits-release-build
+
+BUILD_PRODUCTS_DIR="${ROOT}/macos"
+
+# Use our own temp dir which is .gitignored for debugging
+TMP="${BUILD_PRODUCTS_DIR}/tmp"
+mkdir -p "${TMP}"
+
+PACKAGING_DIR="${BUILD_PRODUCTS_DIR}/packaging"
+PACKAGES_DIR="${BUILD_PRODUCTS_DIR}/packages"
+COMMON_REQUIREMENTS_PLIST="${BUILD_PRODUCTS_DIR}/installer_requirements.plist"
+PKGINFO_TEMPLATE="${BUILD_PRODUCTS_DIR}/PkgInfo"
+EXPORT_OPTIONS_TEMPLATE="${BUILD_PRODUCTS_DIR}/export_options.plist.template"
+PKGBUILD_PLIST_TEMPLATE="${BUILD_PRODUCTS_DIR}/package_component.plist.template"
+
+if [ -n "${DISTRIBUTION_SIGNING_ID}" ]; then
+    echo "Have installer signing id: '${DISTRIBUTION_SIGNING_ID}'"
+else
+    echo "DISTRIBUTION_SIGNING_ID unset.  The following (if any) are valid signing"
+    echo "identities (set DISTRIBUTION_SIGNING_ID to the hexadecimal portion):"
+    security find-identity -v -p codesigning | grep "Developer ID Installer" | cut -b6-
+    exit 1
+fi
+
+if [ -n "${NOTARIZATION_TEAM_ID}" ]; then
+    echo "Have notarization team id id: '${NOTARIZATION_TEAM_ID}'"
+else
+    echo "NOTARIZATION_TEAM_ID unset. Needed to notarize the application archive to"
+    echo "build an installer.  For a personal team, it is probably your name."
+fi
+
+# Alternative:
+# Move the notarized application into a dir called root. 
+# pkgbuild --analyze --root ./root/pktest.plist - template this
+# Then, e.g.
+# pkgbuild --install-location /Applications --compression latest --min-os-version 13.3 \
+# --sign "${DISTRIBUTION_SIGNING_ID}" --timestamp --identifier "com.mastfrog.dsp.RustDspInProcessDemo" \
+# --root ./root --component-plist pktest.plist AnotherInstaller.pkg
+
+function do_one {
+    local PROJECT_NAME="${1}"
+    
+    local EXTENSION_NAME="${PROJECT_NAME}Extension"
+    local DEFAULT_FRAMEWORK_NAME="${PROJECT_NAME}Framework"
+    
+    # The framework name is an optional second argument
+    local FRAMEWORK_NAME="${2:-$DEFAULT_FRAMEWORK_NAME}"
+
+    local PROJECT_DIR="${BUILD_PRODUCTS_DIR}/${PROJECT_NAME}"
+
+    echo
+    echo
+    echo " *************** Finding Product Identifier ********************** "
+    
+    local BUNDLE_ID_INFO=$(cd "${PROJECT_DIR}" && xcodebuild -quiet -showBuildSettings | grep PRODUCT_BUNDLE_IDENTIFIER)
+    local BUNDLE_ID=$(echo $BUNDLE_ID_INFO | rev | cut -d= -f1 | rev | cut -b2-)
+
+    echo    
+    echo BUNDLE_ID = "'${BUNDLE_ID}'"
+    EXTENSION_BUNDLE_ID="${BUNDLE_ID}.${EXTENSION_NAME}"
+    echo EXTENSION_BUNDLE_ID = "'${EXTENSION_BUNDLE_ID}'"
+    
+    echo
+    
+    local PROJECT_TMP="${TMP}/${PROJECT_NAME}"
+    rm -Rf "${PROJECT_TMP}"
+    mkdir -p "${PROJECT_TMP}"
+    
+    local EXPORT_OPTIONS_PLIST="${PROJECT_TMP}/${PROJECT_NAME}ExportOptions.plist"
+    
+    local ARCHIVE_TEAM_ID_SED_ARG="s^TEAM_ID^${NOTARIZATION_TEAM_ID}^g"
+    local ARCHIVE_BUNDLE_ID_SED_ARG="s^<string>BUNDLE_ID</string>^<string>${BUNDLE_ID}</string>^g"
+    local ARCHIVE_BUNDLE_ID_SED_ARG2="s^<key>BUNDLE_ID</key>^<key>${BUNDLE_ID}</key>^g"
+    local ARCHIVE_PROJECT_NAME_SED_ARG="s^<string>PROJECT_NAME</string>^<string>${PROJECT_NAME}</string>^g"
+    
+    local ARCHIVE_EXTENSION_NAME_SED_ARG="s^<string>EXTENSION_NAME</string>^<string>${EXTENSION_NAME}</string>^g"
+    local ARCHIVE_EXTENSION_BUNDLE_ID_SED_ARG="s^<string>EXTENSION_BUNDLE_ID</string>^<string>${EXTENSION_BUNDLE_ID}</string>^g"
+    local ARCHIVE_EXTENSION_BUNDLE_ID_SED_ARG2="s^<key>EXTENSION_BUNDLE_ID</key>^<key>${EXTENSION_BUNDLE_ID}</key>^g"
+    
+    cat "${EXPORT_OPTIONS_TEMPLATE}" \
+        | sed -e "${ARCHIVE_TEAM_ID_SED_ARG}" \
+        | sed -e "${ARCHIVE_BUNDLE_ID_SED_ARG}" \
+        | sed -e "${ARCHIVE_BUNDLE_ID_SED_ARG}" \
+        | sed -e "${ARCHIVE_BUNDLE_ID_SED_ARG2}" \
+        | sed -e "${ARCHIVE_BUNDLE_ID_SED_ARG2}" \
+        | sed -e "${ARCHIVE_PROJECT_NAME_SED_ARG}" \
+        | sed -e "${ARCHIVE_EXTENSION_NAME_SED_ARG}" \
+        | sed -e "${ARCHIVE_EXTENSION_BUNDLE_ID_SED_ARG}" \
+        | sed -e "${ARCHIVE_EXTENSION_BUNDLE_ID_SED_ARG2}" \
+        > "${EXPORT_OPTIONS_PLIST}"
+        
+    local PKG_PROJECT_NAME_SED_ARG="s^PROJECT_NAME^${PROJECT_NAME}^g"
+    local PKG_EXTENSION_NAME_SED_ARG="s^EXTENSION_NAME^${EXTENSION_NAME}^g"
+    local PKG_FRAMEWORK_NAME_SED_ARG="s^FRAMEWORK_NAME^${FRAMEWORK_NAME}^g"
+    
+    local PKGBUILD_PLIST="${PROJECT_TMP}/${PROJECT_NAME}.pkgbuild.plist"
+    
+    cat "${PKGBUILD_PLIST_TEMPLATE}" \
+        | sed -e "${PKG_PROJECT_NAME_SED_ARG}" \
+        | sed -e "${PKG_EXTENSION_NAME_SED_ARG}" \
+        | sed -e "${PKG_FRAMEWORK_NAME_SED_ARG}" \
+        > "${PKGBUILD_PLIST}"
+        
+    echo "Wrote pkgbuild plist to ${PKGBUILD_PLIST}"        
+
+    local PROJECT_DIR="${BUILD_PRODUCTS_DIR}/${PROJECT_NAME}"
+    local BUILD_DIR="${PROJECT_DIR}/DerivedData/Build/Products/Release"
+    local APP_DIR_NAME="${PROJECT_NAME}.app"
+
+    local PROJECT_XCODE_PATH="${PROJECT_DIR}/${PROJECT_NAME}.xcodeproj"
+    
+    local ARCHIVE_PATH="${PROJECT_TMP}/${PROJECT_NAME}.xcarchive"
+
+    echo
+    echo
+    echo " ******************** Archiving Project ************************ "
+    
+    xcodebuild -quiet archive \
+        -project "${PROJECT_XCODE_PATH}" \
+        -scheme "${PROJECT_NAME}" \
+        -configuration Release \
+        -archivePath "${ARCHIVE_PATH}"
+
+    echo
+    echo
+    echo " ******************* Exporting App From Archive *********************** "
+    
+    local APP_EXPORT_BASE="${PROJECT_TMP}/export"
+    rm -Rf "${APP_EXPORT_BASE}"
+    mkdir -p "${APP_EXPORT_BASE}"
+    local APP_EXPORT_PATH="${APP_EXPORT_BASE}/${PROJECT_NAME}.app"
+
+    xcodebuild -quiet archive \
+        -archivePath "${ARCHIVE_PATH}" \
+        -exportArchive \
+        -exportOptionsPlist "${EXPORT_OPTIONS_PLIST}" \
+        -exportPath ${APP_EXPORT_BASE}
+
+    echo
+    echo
+    echo " **************** Creating Zip For App Notarization ******************** "
+    
+    local APP_ZIP_PATH="${PROJECT_TMP}/${PROJECT_NAME}.zip"
+    /usr/bin/ditto -c -k --keepParent "${APP_EXPORT_PATH}" "${APP_ZIP_PATH}"
+    
+
+    echo
+    echo
+    echo " ******************** Stapling App Notarization ************************ "
+    
+    xcrun notarytool submit "${APP_ZIP_PATH}" --keychain-profile "notarytool" --wait
+    xcrun stapler staple "${APP_EXPORT_PATH}"
+    
+    echo
+    echo
+    echo " ********************** Generating Installer ************************** "
+    
+    
+    local PACKAGED_BUILD="${PACKAGES_DIR}/${PROJECT_NAME}.pkg"
+    
+    echo PKGBUILD_CMDLINE:
+    echo "pkgbuild --install-location /Applications --compression latest --min-os-version 13.3 --sign ${DISTRIBUTION_SIGNING_ID} --timestamp --identifier ${BUNDLE_ID} --root ${APP_EXPORT_BASE} --component-plist ${PKGBUILD_PLIST} ${PACKAGED_BUILD}"
+
+    pkgbuild --install-location "/Applications" --compression latest --min-os-version 13.3 \
+        --sign "${DISTRIBUTION_SIGNING_ID}" --timestamp --identifier "${BUNDLE_ID}" \
+        --root ${APP_EXPORT_BASE} --component-plist "${PKGBUILD_PLIST}" "${PACKAGED_BUILD}"
+
+    # See: https://scriptingosx.com/2021/07/notarize-a-command-line-tool-with-notarytool/
+    
+    xcrun notarytool submit -v --no-progress --no-s3-acceleration --keychain-profile "notarytool" --team-id "${NOTARIZATION_TEAM_ID}" \
+        --wait "${PACKAGED_BUILD}"
+
+    echo
+    echo " ********************** Stapling Notarization ************************** "
+    
+    xcrun stapler staple "${PACKAGED_BUILD}"
+}
+
+do_one RustDspInProcessDemo RustDspInProcessFramework

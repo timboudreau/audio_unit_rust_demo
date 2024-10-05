@@ -1,0 +1,26 @@
+[workspace]
+resolver = "2"
+
+members = [ 
+    "crates/mock_dsp_lib"
+  , "crates/cbindgen-bindgen"
+]
+
+[workspace.package]
+edition = "2021"
+authors = ["Tim Boudreau <tim@timboudreau.com>"]
+license = "MIT"
+version = "0.1.0"
+
+
+[profile.release]
+codegen-units = 1
+lto="fat"
+debug-assertions=false
+debug = false
+strip = "symbols"
+overflow-checks = false
+incremental = false
+opt-level = 3
+panic = "unwind"
+
