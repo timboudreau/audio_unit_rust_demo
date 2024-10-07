@@ -274,3 +274,172 @@ you reconfigure the projects to use your certificates, these are the things to c
        you changed it to)
    * A profile named `RustDspInProcessDemoExtension` for an app `com.mastfrog.dsp.RustDspInProcessDemo.RustDspInProcessDemoExtension` (or whatever you changed that to)
      
+
+Writing Audio Units In Rust
+===========================
+
+Below are some observations based on building plugins in Rust that may or may not be useful, but
+might safe some false starts:
+
+ * The Audio Unit API *relies* on passing pointers around and foreign code on random threads updating
+ them in real time while processing happens.  That is pretty antithetical to Rust's strict ownership
+ and borrowing rules.  You simply need to embrace that - these are the situations *unsafe* Rust is
+ for.  In my case - and you can see a little of that in the atomic-related exported functions in
+ `crates/mock_dsp_lib/lib.rs` - the solution was to use atomics and create a small library for setting
+ and reading pointers of various types that is used by both the C++ code and the Rust code for consistency.
+ If you eventually implement *ramping* - gradually incrementing parameters toward a target as samples are
+ processed - then you will have code that updates these parameters on both sides of the language divide.
+ * Where possible, keep allocation happening on the C++ side of things.  The one case you can't do that
+ for is allocating the thing that does the DSP processing on the rust side.  A simple and workable solution
+ is simply to `Box::leak` the allocated DSP processor, and provide a C-ABI call that accepts a pointer and
+ deallocates it (as `crates/mock_dsp_lib/lib.rs` does).  It's going to be some code's responsibility to drop
+ DSP processors, and only the C++ code has enough information to know when it's safe to do it.
+ * Apple's Audio Unit template contains a latent race-condition, where the audio unit can be deallocated
+ while the render thread is still inside its render block. This only *really* starts to show up when
+ you support presets and try to change the active preset during audio playback. Logic Pro will tear down
+ and recreate the plugin.  `RustDspPlainDemoExtensionAudioUnit.mm` shows one (not foolproof, but adequate) 
+ way to work around this, by adding an atomic spinlock that blocks deinitialization if a thread is inside
+ the render block.
+ * The `os_log` crate may be tempting to use Apple's for unified logging from the Rust side of things.  Don't. It
+ assumes logged strings will not be dropped before they are synchronously logged, but - this may be specific
+ to real-time threads - the logging may not be synchronous. I have submitted one patch that has been thus
+ far been ignored, but it only solves the most common case, not all of the cases.
+ * If you have more than a trivial number of plugins, embrace code-generation and generate as much of the
+ Objective C and C++ - particularly the DSP kernel and audio unit implementation - as possible.  What I did
+ for this, while unpretty and too domain-specific to be useful to open-source, was the following:
+  * Used the [`linkme`](https://crates.io/crates/linkme) crate, which can store arbitrary metadata you
+  define in a custom linker section of your Rust binary - sort of *roll your own RTTI*
+  * Wrote some custom Rust macros that allow a "create the DSP processor" function to be annotated with
+  things like min/default/max parameter values, names of mono-process/stereo-process/destroy/reset functions
+  * Generate metadata into that custom linker section - *only when compiled with a flag* (so it doesn't
+  end up in the binary I ship at all)
+  * Write a code generation app which depends on every plugin *with that flag set*, which can read it and
+  generate the appropriate code
+ * There does exist a crate with Rust bindings that could potentially let you create pure-Rust audio-units.
+ Looking at it, it appears to have missed a bunch of fundamentals - for example, it hardcodes the plugin
+ vendor to be Apple where a cursory read of the docs will tell you that the code the author could only
+ find one example of is the plugin identifier - those three blocks of ascii characters.  It does not
+ appear to be usable without extensive work.
+  
+The fun part of writing Audio Units in Rust is that it is pretty ideally suited to DSP - both with easy use of SIMD
+and the fact that if you leverage const-generics, you can turn an *enormous* number of potential bugs that
+are easy to have and hard to detect into compile-time errors your software simply cannot have at runtime
+(for example, mismatching the number of channels being processed through a signal chain); as a bonus,
+since Rust monomorphizes code, all of the decisions about code-paths to take based on things like that
+get pushed to compile-time, and you just wind up with a different version of your code running for one
+case or another, which has performance benefits.
+
+The not-fun part of writing Audio Units, period, is Apple's antique kludge of a build system and the
+layers of cruft that bolt things like code-signing and notarizing onto it.  As someone who spent a lot
+of my career in developer tools, I continually resist the temptation to examine what the build is actually
+up to and write a tool that recreates that in a sane, modern way.  I suggest you resist that temptation too.
+
+
+How To Split Apple's Template Code Into A Framework + Application Extension
+===========================================================================
+
+Apple's template gives you a project with two targets:  An application (needed, I guess, to give AUv3 users
+a way to uninstall?), and an Application Extension which contains the plugin code.
+
+The result of this cannot be loaded in-process by host applications - an application extension's Mach-O type
+is *executable*, which cannot be treated as a library by foreign code, but must instead be launched and
+communicated with by some form of IPC.  For things that may be called thousands of times per-second to process
+real-time audio, that is decidedly not ideal, bordering on unacceptable.
+
+The documentation of how to actually carve up such a project to make it possible to load a plugin in-process
+amounts to a [few minimal lines of instructions](https://developer.apple.com/documentation/avfaudio/audio_engine/creating_custom_audio_effects?language=objc) to
+
+ * Move all the code to a new framework target
+ * Create a dummy source file and leave that as the only compiled source for the Application Extension (the
+   build system appears to need this to have something to build)
+ * Modify the appex's `Info.plist` to point to the framework
+ * Override a couple of constructors in the main UI
+
+Here are the steps I have used that work to achieve this, starting from a project as Xcode's template creates it:
+
+ 1. Create a new Framework target.  Name it - if your effect is named "Whatever" - `WhateverFramework`
+ 2. On the Build Phases tabs, switching between the old extension target and the new framework target,
+ add every source being built by the extension into the Compile Sources phase of the new framework target
+ 3. In the same place, for the Headers phase, add any `.h` files in the extension project (but not `.hpp` files) to
+ the *Public* headers
+ 4. For any (Rust, or whatever) libraries the application extension was using, you need to
+   1. Create links in the project to the header files so Xcode knows about them - even though they exist
+   in the xcframeworks you're importing, they won't be found otherwise
+   2. Add each of these to the *Private* headers in the Headers build phase
+ 5. Now we come to the woefully underdocumented parts:  When those libraries were used from the application
+   extension, all we needed was to set the build setting *Allow Non Modular Includes* to `YES` and things
+   would work.  A framework is a different beast, and you cannot just include stuff.  While we *could*
+   have our xcframeworks include a `module.modulemap` file, this runs aground as soon as you have *more
+   than one* - it *must* be named `module.modulemap` and the xcodebuild will try to clobber them with
+   each other and fail (I spent many days attempting a workaround for this. There is none.).  So 
+   what we need to do is create the sum of the module maps we would have put in each library inside the 
+   framework project, and tell the build that is the private module map of the project; and create a public
+   module map that maps the headers a caller needs to find to use our plugin.  Steps:
+    1. Create a file `public.modulemap` in the framework project (example below). It should pull in the
+    generated `WhateverFramework.h` file created when you created the framework target as an umbrella header, 
+    and at a minimum, the headers for the Audio Unit which were generated by the Apple template - e.g. 
+    `WhateverExtensionAudioUnit.h`
+    2. Find the build setting for the public modulemap and set it to the relative path using Apple's
+    build variable dereferencing syntax, e.g. `$(SRCROOT)/WhateverFramework/public.modulemap`
+    3. Create a file `private.modulemap` mapping any headers from libraries (example below)
+    4. Find the build setting for the private module map and do likewise for it.  Note the naming in the
+    module map files is strict - i.e. `WhateverFramework` and `WhateverFramework_Private` in the first
+    line that names the module. This accomplishes the same thing as the *Objective C Bridging Header*
+    did in the extension project, allowing library code to be visible to Swift
+    5. This step is optional, but helpful if you have projects that share sources (I shouldn't, but I do):
+    Alias the private module so the libraries can be imported using a common name across projects -
+    in the build setting *Other Swift Flags* add, e.g. `-module-alias PluginLibs=WhateverFramework_Private`.
+    Most of my plugins have a several of the same xcframeworks plus one that implements that specific
+    effect, and the Swift and Cocoa UI code is shared across them, so this makes those sources build
+    unmodified in multiple projects that define `PluginLibs` just by adding `import PluginLibs`.
+    6. For whatever reason, the Swift compiler may begin complaining about some esoterica that needs
+    to be addressed - in this setup, code that uses `ObservableObject` and similar needs an import of
+    `Combine` where it did not before, and you may get some warnings about closed enums defined in the
+    same source file possibly growing new members and switches over their members not having a default
+    branch. I do not know the reason the Swift compiler behaves differently, but these are all easy
+    enough to fix.
+    7. When importing from a module-map, the compiler will now complain if the header files for your
+    libraries use quotes instead of angle-brackets for `include` statements.  If you are using the
+    `cbindgen-bindgen` code from this project, simply add an empty file named `hack_cbindgen_includes`
+    in the root of each crate triggering such a warning; if you are doing something else you may need to
+    edit your header files or whatever generates them.
+  6. Once all of that is done, delete all sources and headers from the extension target's *Headers* and
+    *Compile Sources* phases - they now belong to the framework, not the extension, which is an empty shell
+    that points to the framework
+  7. As described in the docs linked above, create an empty Swift source file with a single empty function
+    in it, in the extension project's sources. If you're feeling saucy, name it something like
+    `xcodebuild_is_a_bag_of_steve_jobs_ossified_turds()`.
+  8. Add that one source file to the Compile Sources phase of the application extension
+  9. Shut down Xcode, delete the build directory, reopen it, build it and see what's still broken, and
+     iterate until it isn't :-)
+
+Note that xcode caches module information in the `DerivedData` dir, and *does not delete it when you clean
+the build directory`.  If you fiddle with the contents of module maps or who owns them even a little, exit
+Xcode and `rm -Rf` the entire `DerivedData` build dir, or you can spend hours chasing problems that don't
+actually exist.
+
+    
+#### Example public module map
+   
+```c
+framework module ZenWidenerFramework {
+    umbrella header "ZenWidenerFramework.h"
+    header "ZenWidenerPresets.h"
+    header "ZenWidenerAddresses.h"
+    header "ZenWidenerExtensionAudioUnit.h"
+    export *
+}
+```
+   
+#### Example private module map
+   
+```c
+framework module ZenWidenerFramework_Private {
+    header "curve.h"
+    header "atomics.h"
+    header "mute_solo_bypass.h"
+    header "widener_plugin.h"
+    export *
+}
+```
+   
