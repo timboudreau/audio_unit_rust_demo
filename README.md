@@ -361,7 +361,7 @@ might safe some false starts:
   for generating code that is heavily configuration-dependent in fussy ways - I went that route for generating
   the C++ DSP kernel code, which varies widely based on the kinds of I/O stats collected for multiband processing,
   the parameters, etc. which is the sort of thing that becomes nearly unreadable in any templating language.
- * It appears that Apple's template Audio Units just black-holes any render observers passed to
+ * It appears that Apple's template Audio Units just black-hole any render observers passed to
  `AudioUnit.tokenByAddingRenderObserver()` - they are never called - probably the fault of the `AUProcessHelper`
  that the template provides.  You will need to override it, do your own bookkeeping for them, capture a block
  pointer to a dictionary or similar of them in the render block, and call them manually
