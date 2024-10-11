@@ -331,11 +331,20 @@ might safe some false starts:
       metadata used by the UI to display levels on screen)
   * Write a code generation app which depends on every plugin *with that flag set*, which can read it and
   generate the appropriate code in the various languages
+ * It appears that Apple's template Audio Units just black-holes any render observers passed to
+ `AudioUnit.tokenByAddingRenderObserver()` - they are never called - probably the fault of the `AUProcessHelper`
+ that the template provides.  You will need to override it, do your own bookkeeping for them, capture a block
+ pointer to a dictionary or similar of them in the render block, and call them manually
+ * Apple's template sets your plugin up to support eight channels of audio.  Unless you intend to support that,
+ you need to edit the generated `WhateverAudioUnit.mm` to report what it really does in several places - the
+ `channels` argument to the initial format and `_outputBus.maximumChannelCount` in `setupAudioBuses()`, and
+ as pairs of integers in the value returned from `channelCapabilities`. Failure to set all of these consistently can
+ result in a plugin validation warning or failure.
  * There does exist a crate with Rust bindings that could potentially let you create pure-Rust audio-units.
  Looking at it, it appears to have missed a bunch of fundamentals - for example, it hardcodes the plugin
  vendor to be Apple where a cursory read of the docs will tell you that the code the author could only
  find one example of is the plugin identifier - those three blocks of ascii characters.  It does not
- appear to be usable without extensive patching, if at all, nice as it would be to kick Xcode to the curb.
+ appear to be usable without extensive patching, if at all, delightful as it would be to kick Xcode to the curb.
   
 The fun part of writing Audio Units in Rust is that it is pretty ideally suited to DSP - both with easy use of SIMD
 and the fact that if you leverage const-generics, you can turn an *enormous* number of potential bugs that
