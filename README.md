@@ -529,9 +529,6 @@ harmless if left behind, but no longer needed:
    e.g. `WhateverProject/WhateverProjectExtension/WhateverProjectExtensionBridgingHeader`. The
    module map files we created take the place of that in the new framework
 
-You can delete the generated Objective C Bridging Header and remove the settings entry for it from the
-
-
 ### Optimization
 
 Once things are working properly, you may want to set the *Optimization Level* setting for the framework
