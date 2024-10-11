@@ -286,8 +286,10 @@ might safe some false starts:
  and borrowing rules.  You simply need to embrace that - these are the situations *unsafe* Rust is
  for.  In my case - and you can see a little of that in the atomic-related exported functions in
  `crates/mock_dsp_lib/lib.rs` - the solution was to use atomics and create a small library for setting
- and reading pointers of various types that is used by both the C++ code and the Rust code for consistency.
- If you eventually implement *ramping* - gradually incrementing parameters toward a target as samples are
+ and reading pointers of various types (you can create an atomic `f64` or `f32` using `to_bits()` before
+ setting it on an `AtomicU64` or `AtomicU32` and converting back on read with zero runtime cost) 
+ that is used by both the C++ code and the Rust code for consistency. If you eventually implement 
+ *ramping* - gradually incrementing parameters toward a target as samples are
  processed - then you will have code that updates these parameters on both sides of the language divide.
  * Where practical, capture rather than reread those atomic pointers - for example, if you have a compressor
  with a release time, set a variable with the threshold or ratio from the pointer *at the sample that
