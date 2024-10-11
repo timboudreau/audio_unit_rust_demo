@@ -114,7 +114,7 @@ Quickstart
    * `RustDspInProcessDemo` is the a revision of the above to move all of the code into a Framework and leave
      the Audio Unit app extension as an empty shell that delegates to the Framework, so that it can
      be (but isn't currently - the problem I'm trying to solve) loaded in-process by the host
- 3. The scripts expect Xcode to be configured to build into `$PRODUCT/DerivedData`, not the random
+ 3. The scripts expect Xcode to be configured to build into `$PROJECT/DerivedData`, not the random
     location in your home directory it defaults to. This seems to be a system-wide setting.
 
 Note that you will need to set these projects to be signed with *your* credentials to actually build anything
