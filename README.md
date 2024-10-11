@@ -363,7 +363,7 @@ might safe some false starts:
   * The [`tinytemplate`](https://crates.io/crates/tinytemplate/) crate was useful for generating the Audio Unit `.mm`,
   which is largely deciding chunks of boilerplate to include, though you can't beat the granularity of
   old-fashioned programmatic code-generation 
-  (which you can actually make [lovely to write](https://github.com/timboudreau/annotation-tools/blob/master/java-vogon/README.md)
+  (which you can actually make [lovely to write](https://github.com/timboudreau/annotation-tools/blob/master/java-vogon/README.md))
   for generating code that is heavily configuration-dependent in fussy ways - I went that route for generating
   the C++ DSP kernel code, which varies widely based on the kinds of I/O stats collected for multiband processing,
   the parameters, etc. which is the sort of thing that becomes nearly unreadable in any templating language.
