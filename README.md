@@ -535,9 +535,9 @@ if you share sources or libraries across multiple projects.
 ### Never Trust a Dirty Build; Xcode's Clean ... Doesn't Always
 
 Note that Xcode caches module information in the `DerivedData` dir, and *does not delete it when you clean
-the build directory`.  If you fiddle with the contents of module maps or who owns them even a little, exit
+the build directory*.  If you fiddle with the contents of module maps or who owns them even a little, exit
 Xcode and `rm -Rf` the entire `DerivedData` build dir, or you can spend hours chasing problems that don't
-actually exist.
+actually exist, because Xcode doesn't invalidate its cache.
 
 Every IDE author's ten commandments should include *Thou shalt not create caches thou
 canst not invalidate when they need it 100% of the time*, but in Xcode's case, it was omitted.
