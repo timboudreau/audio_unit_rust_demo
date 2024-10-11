@@ -473,6 +473,13 @@ harmless if left behind, but no longer needed:
 You can delete the generated Objective C Bridging Header and remove the settings entry for it from the
 
 
+### Optimization
+
+Once things are working properly, you may want to set the *Optimization Level* setting for the framework
+path to `-Ofast` and *Link Time Optimization* to `Monolithic` for release build, and enable `Dead Code Stripping`
+if you share sources or libraries across multiple projects.
+
+
 ### Never Trust a Dirty Build; Clean Doesn't Mean Clean
 
 Note that Xcode caches module information in the `DerivedData` dir, and *does not delete it when you clean
