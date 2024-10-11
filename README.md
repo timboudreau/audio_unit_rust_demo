@@ -275,8 +275,8 @@ you reconfigure the projects to use your certificates, these are the things to c
    * A profile named `RustDspInProcessDemoExtension` for an app `com.mastfrog.dsp.RustDspInProcessDemo.RustDspInProcessDemoExtension` (or whatever you changed that to)
      
 
-Writing Audio Units In Rust
-===========================
+Writing DSP for Audio Units In Rust
+===================================
 
 Below are some observations based on building plugins in Rust that may or may not be useful, but
 might safe some false starts:
@@ -289,6 +289,11 @@ might safe some false starts:
  and reading pointers of various types that is used by both the C++ code and the Rust code for consistency.
  If you eventually implement *ramping* - gradually incrementing parameters toward a target as samples are
  processed - then you will have code that updates these parameters on both sides of the language divide.
+ * Where practical, capture rather than reread those atomic pointers - for example, if you have a compressor
+ with a release time, set a variable with the threshold or ratio from the pointer *at the sample that
+ triggers it* and then use that value until the release time has expired - yes, you want those things
+ to be dynamic, but it is likely not useful for them to be *that* dynamic, and you get a minor but
+ real performance boost at the price of 4 bytes of memory
  * Where possible, keep allocation happening on the C++ side of things.  The one case you can't do that
  for is allocating the thing that does the DSP processing on the rust side.  A simple and workable solution
  is simply to `Box::leak` the allocated DSP processor, and provide a C-ABI call that accepts a pointer and
@@ -297,29 +302,40 @@ might safe some false starts:
  * Apple's Audio Unit template contains a latent race-condition, where the audio unit can be deallocated
  while the render thread is still inside its render block. This only *really* starts to show up when
  you support presets and try to change the active preset during audio playback. Logic Pro will tear down
- and recreate the plugin.  `RustDspPlainDemoExtensionAudioUnit.mm` shows one (not foolproof, but adequate) 
+ and recreate the plugin while the render thread plugs merrily along.  `RustDspPlainDemoExtensionAudioUnit.mm`
+ shows one (not foolproof, but adequate - grabbing a mutex in the render thread is not okay) 
  way to work around this, by adding an atomic spinlock that blocks deinitialization if a thread is inside
- the render block.
+ the render block (just an atomic byte and a busywait in `deallocateRenderResources()`)
  * The `os_log` crate may be tempting to use Apple's for unified logging from the Rust side of things.  Don't. It
  assumes logged strings will not be dropped before they are synchronously logged, but - this may be specific
  to real-time threads - the logging may not be synchronous. I have submitted one patch that has been thus
- far been ignored, but it only solves the most common case, not all of the cases.
+ far been ignored, but it only solves the most common case, not all of the cases. It's pretty but not usable
+ in production code.
  * If you have more than a trivial number of plugins, embrace code-generation and generate as much of the
  Objective C and C++ - particularly the DSP kernel and audio unit implementation - as possible.  What I did
  for this, while unpretty and too domain-specific to be useful to open-source, was the following:
   * Used the [`linkme`](https://crates.io/crates/linkme) crate, which can store arbitrary metadata you
-  define in a custom linker section of your Rust binary - sort of *roll your own RTTI*
+  define in a custom linker section of your Rust binary - sort of *roll your own RTTI*, since Rust has none
   * Wrote some custom Rust macros that allow a "create the DSP processor" function to be annotated with
   things like min/default/max parameter values, names of mono-process/stereo-process/destroy/reset functions
-  * Generate metadata into that custom linker section - *only when compiled with a flag* (so it doesn't
-  end up in the binary I ship at all)
+  * Generate metadata into that custom linker section - *only when compiled with a feature-flag* (so it doesn't
+  end up in the binary I ship at all).  Things that are useful to capture - I simply used a naming convention
+  such that `gain_default` defines a default value for `gain` *and also for* `gain_whatever` unless there's
+  a `gain_whatever_default` (this requires some care to avoid prefix collisons, but I'm not going for Turing
+  completeness here and it's easy enough to avoid):
+    * Default/Min/Max value for each parameter
+    * Display name templates for parameters
+    * The *global namespace* C-ABI name for the destroy/process-mono/process-stereo and reset state functions
+    * If you have more than one, the type name of a C `struct` you return from processing functions (in my
+      case, I have 4, 8 and 16 band processing result types because they embed input and output level
+      metadata used by the UI to display levels on screen)
   * Write a code generation app which depends on every plugin *with that flag set*, which can read it and
-  generate the appropriate code
+  generate the appropriate code in the various languages
  * There does exist a crate with Rust bindings that could potentially let you create pure-Rust audio-units.
  Looking at it, it appears to have missed a bunch of fundamentals - for example, it hardcodes the plugin
  vendor to be Apple where a cursory read of the docs will tell you that the code the author could only
  find one example of is the plugin identifier - those three blocks of ascii characters.  It does not
- appear to be usable without extensive work.
+ appear to be usable without extensive patching, if at all, nice as it would be to kick Xcode to the curb.
   
 The fun part of writing Audio Units in Rust is that it is pretty ideally suited to DSP - both with easy use of SIMD
 and the fact that if you leverage const-generics, you can turn an *enormous* number of potential bugs that
