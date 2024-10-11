@@ -96,7 +96,9 @@ Prerequisites
  * Mac OS 13 or newer + an SDK for Mac OS 13 (or perhaps later if you tweak `build-xcframeworks`)
  * Xcode 14 or newer + command-line tools (`xcodebuild` and `lipo` are used)
  * A Rust toolchain including `cargo` - built with Rust 1.80.1 - whatever `rustup` gives you that supports 2021
-   edition or newer should be fine
+   edition or newer should be fine, with target architectures for `aarch64-apple-darwin` and `x86_64-apple-darwin`
+   installed (use `rustup target add ...` for whichever you're not running on) - the build scripts
+   cross-compile for both architectures
 
 
 Quickstart
