@@ -377,12 +377,8 @@ might safe some false starts:
  appear to be usable without extensive patching, if at all, delightful as it would be to kick Xcode to the curb.
   
 The fun part of writing Audio Units in Rust is that it is pretty ideally suited to DSP - both with easy use of SIMD
-and the fact that if you leverage const-generics, you can turn an *enormous* number of potential bugs that
-are easy to have and hard to detect into compile-time errors your software simply cannot have at runtime
-(for example, mismatching the number of channels being processed through a signal chain); as a bonus,
-since Rust monomorphizes code, all of the decisions about code-paths to take based on things like that
-get pushed to compile-time, and you just wind up with a different version of your code running for one
-case or another, which has performance benefits.
+and that the type system's features can be leveraged to improve performance, factor code cleanly into separate
+concerns with zero runtime cost, and turn several entire categories of easy-to-have bug into compile-time errors.
 
 The not-fun part of writing Audio Units, period, is Apple's antique kludge of a build system and the
 layers of cruft that bolt things like code-signing and notarizing onto it.  As someone who spent a lot
