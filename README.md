@@ -334,24 +334,24 @@ might safe some false starts:
  * If you have more than a trivial number of plugins, embrace code-generation and generate as much of the
  Objective C and C++ - particularly the DSP kernel and audio unit implementation - as possible.  What I did
  for this, while unpretty and too domain-specific to be useful to open-source, was the following:
-  * Used the [`linkme`](https://crates.io/crates/linkme) crate, which can store arbitrary metadata you
-  define in a custom linker section of your Rust binary - sort of *roll your own RTTI*, since Rust has none
-  * Wrote some custom Rust macros that allow a "create the DSP processor" function to be annotated with
-  things like min/default/max parameter values, names of mono-process/stereo-process/destroy/reset functions
-  * Generate metadata into that custom linker section - *only when compiled with a feature-flag* (so it doesn't
-  end up in the binary I ship at all).  Things that are useful to capture - I simply used a naming convention
-  such that `gain_default` defines a default value for `gain` *and also for* `gain_whatever` unless there's
-  a `gain_whatever_default` (this requires some care to avoid prefix collisons, but I'm not going for Turing
-  completeness here and it's easy enough to avoid):
-    * Default/Min/Max value for each parameter
-    * Display name templates for parameters
-    * The *global namespace* C-ABI name for the destroy/process-mono/process-stereo and reset state functions
-    * If you have more than one, the type name of a C `struct` you return from processing functions (in my
-      case, I have 4, 8 and 16 band processing result types because they embed input and output level
-      metadata used by the UI to display levels on screen)
-    * Adhoc flags for things like if a parameter should not be modified in real-time because it will cause
-      audible artifacts, or one which is used by-value on Rust DSP processor creation and requires it to be
-      torn down and recreated (for example, lookahead buffers which use heap-allocated arrays for performance)
+   * Used the [`linkme`](https://crates.io/crates/linkme) crate, which can store arbitrary metadata you
+   define in a custom linker section of your Rust binary - sort of *roll your own RTTI*, since Rust has none
+   * Wrote some custom Rust macros that allow a "create the DSP processor" function to be annotated with
+   things like min/default/max parameter values, names of mono-process/stereo-process/destroy/reset functions
+   * Generate metadata into that custom linker section - *only when compiled with a feature-flag* (so it doesn't
+   end up in the binary I ship at all).  Things that are useful to capture - I simply used a naming convention
+   such that `gain_default` defines a default value for `gain` *and also for* `gain_whatever` unless there's
+   a `gain_whatever_default` (this requires some care to avoid prefix collisons, but I'm not going for Turing
+   completeness here and it's easy enough to avoid):
+     * Default/Min/Max value for each parameter
+     * Display name templates for parameters
+     * The *global namespace* C-ABI name for the destroy/process-mono/process-stereo and reset state functions
+     * If you have more than one, the type name of a C `struct` you return from processing functions (in my
+       case, I have 4, 8 and 16 band processing result types because they embed input and output level
+       metadata used by the UI to display levels on screen)
+     * Adhoc flags for things like if a parameter should not be modified in real-time because it will cause
+       audible artifacts, or one which is used by-value on Rust DSP processor creation and requires it to be
+       torn down and recreated (for example, lookahead buffers which use heap-allocated arrays for performance)
   * Write a code generation app which depends on every plugin *with that flag set*, which can read it and
   generate the appropriate code in the various languages
  * It appears that Apple's template Audio Units just black-holes any render observers passed to
