@@ -354,6 +354,12 @@ might safe some false starts:
        torn down and recreated (for example, lookahead buffers which use heap-allocated arrays for performance)
   * Write a code generation app which depends on every plugin *with that flag set*, which can read it and
   generate the appropriate code in the various languages
+  * [`uniffi`](https://docs.rs/uniffi/latest/uniffi/) can be tempting for easily generating Swift bindings from
+  Rust code, and it *does* work well **but** in performance-critical code, the marshalling it does (and the
+  logging it does, though I submitted a patch to gate that on a feature flag) creates unacceptable overhead. This
+  is really only a problem if you're using it in places like a render listener called on the realtime audio thread
+  (which I needed to do for level indicators updated after each buffer), but that was sufficient for me to switch
+  to C-ABI calls and a little more boilerplate.  For infrequently called code, it will probably be fine.
   * The [`tinytemplate`](https://crates.io/crates/tinytemplate/) was useful for generating the Audio Unit `.mm`,
   which is largely deciding chunks of boilerplate to include, though you can't beat the granularity of
   old-fashioned programmatic code-generation 
