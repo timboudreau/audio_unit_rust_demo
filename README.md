@@ -36,7 +36,7 @@ This project was created to
     appear to work, while simply bunding the semi-useless demo app which is part of the AUv3 template
     causes it to magically be registered - I'd guess due to some filesystem watching black magic,
     but there is no documentation of how it happens
-  * Attempt tog et a fully automated, **command-line** build of multiple audio units working soup-to-nuts, from
+  * Create a fully automated, **command-line** build of multiple audio units working soup-to-nuts, from
     code to signed, notarized, valid, usable installers or dmgs
 
 I have, at present, 13 AudioUnit projects with the DSP done in Rust (most of the audio-unit C++, Swift
