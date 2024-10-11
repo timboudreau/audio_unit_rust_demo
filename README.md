@@ -114,12 +114,20 @@ Quickstart
    * `RustDspInProcessDemo` is the a revision of the above to move all of the code into a Framework and leave
      the Audio Unit app extension as an empty shell that delegates to the Framework, so that it can
      be (but isn't currently - the problem I'm trying to solve) loaded in-process by the host
+ 3. The scripts expect Xcode to be configured to build into `$PRODUCT/DerivedData`, not the random
+    location in your home directory it defaults to. This seems to be a system-wide setting.
 
 Note that you will need to set these projects to be signed with *your* credentials to actually build anything
 (IMHO signing is completely orthagonal to developing and building software, but I guess I see the convenience
 of shoving it into IDE projects, given that the command-line tooling to do this same is excruciating to work
 with).
 
+The audio unit should be visible to audio applications after the Xcode project is built once.  Installers
+(see notes about setting up certs and ids below) are output to `macos/packages`.  Interim products
+that are useful to examine in isolation are written to `macos/headers` and `macos/xcframeworks`.
+
+The first run of `build-xcframeworks` will be slower because it needs to build `cbindgen` which is used
+to generate C headers from Rust code.  It is cached in `bin/cbindgen-bindgen` thereafter.
 
 Details
 -------
