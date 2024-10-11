@@ -354,6 +354,13 @@ might safe some false starts:
        torn down and recreated (for example, lookahead buffers which use heap-allocated arrays for performance)
   * Write a code generation app which depends on every plugin *with that flag set*, which can read it and
   generate the appropriate code in the various languages
+  * The [`tinytemplate`](https://crates.io/crates/tinytemplate/) was useful for generating the Audio Unit `.mm`,
+  which is largely deciding chunks of boilerplate to include, though you can't beat the granularity of
+  old-fashioned programmatic code-generation 
+  (which you can actually make [lovely to write](https://github.com/timboudreau/annotation-tools/blob/master/java-vogon/README.md)
+  for generating code that is heavily configuration-dependent in fussy ways - I went that route for generating
+  the C++ DSP kernel code, which varies widely based on the kinds of I/O stats collected for multiband processing,
+  the parameters, etc. which is the sort of thing that becomes nearly unreadable in any templating language.
  * It appears that Apple's template Audio Units just black-holes any render observers passed to
  `AudioUnit.tokenByAddingRenderObserver()` - they are never called - probably the fault of the `AUProcessHelper`
  that the template provides.  You will need to override it, do your own bookkeeping for them, capture a block
