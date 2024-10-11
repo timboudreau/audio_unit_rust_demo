@@ -576,7 +576,7 @@ from the first build that ran after Xcode started.
 Misc Audio Unit Build, Run and Registration Quirks
 --------------------------------------------------
 
-A few magic strings are created with in the Audio Unit template wizard in Audio Unit which
+A few magic strings are created within the Audio Unit template wizard in Audio Unit which
 can cause misbehavior if they deviate from un- or barely-documented patterns:
 
  * That 4-letter ascii *Manufacturer Code* **really** must contain a capital letter or
