@@ -469,7 +469,11 @@ Here are the steps I have used that work to achieve this, starting from a projec
     * Skip Install - `YES`
   14. Set the *Copyright (Human Readable)* build setting for *each* target to something sane and non-empty,
     and the *Application Category* to `Music` (if unset, installer creation will fail)
-  15. Shut down Xcode, delete the build directory, reopen it, build it and see what's still broken, and
+  15. Set the *entitlements* for the application extension *and* framework to request *Audio Input*,
+    *Outgoing Network Connections* (may be needed for IPC) and *Apple Events* (this is questionable,
+    but I have seen complaints logged in Console and failure to load when this is not set).  This may
+    mean using the *+Capability* button on the *Signing and Capabilities* project tab and adding *App Sandbox*
+  16. Shut down Xcode, delete the build directory, reopen it, build it and see what's still broken, and
      iterate until it isn't :-)
 
 
