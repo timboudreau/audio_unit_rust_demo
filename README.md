@@ -360,7 +360,7 @@ might safe some false starts:
   is really only a problem if you're using it in places like a render listener called on the realtime audio thread
   (which I needed to do for level indicators updated after each buffer), but that was sufficient for me to switch
   to C-ABI calls and a little more boilerplate.  For infrequently called code, it will probably be fine.
-  * The [`tinytemplate`](https://crates.io/crates/tinytemplate/) was useful for generating the Audio Unit `.mm`,
+  * The [`tinytemplate`](https://crates.io/crates/tinytemplate/) crate was useful for generating the Audio Unit `.mm`,
   which is largely deciding chunks of boilerplate to include, though you can't beat the granularity of
   old-fashioned programmatic code-generation 
   (which you can actually make [lovely to write](https://github.com/timboudreau/annotation-tools/blob/master/java-vogon/README.md)
