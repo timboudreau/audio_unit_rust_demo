@@ -532,7 +532,7 @@ path to `-Ofast` and *Link Time Optimization* to `Monolithic` for release build,
 if you share sources or libraries across multiple projects.
 
 
-### Never Trust a Dirty Build; Clean Doesn't Mean Clean
+### Never Trust a Dirty Build; Xcode's Clean ... Doesn't Always
 
 Note that Xcode caches module information in the `DerivedData` dir, and *does not delete it when you clean
 the build directory`.  If you fiddle with the contents of module maps or who owns them even a little, exit
