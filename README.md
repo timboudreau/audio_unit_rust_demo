@@ -306,9 +306,13 @@ might safe some false starts:
    instances of a trait `SampleProcessor<const CHANNELS: u8>`, and an implementation that chains them
    that is, say, `struct BiSampleProcessor<const CHANNELS: u8, A: SampleProcessor<CHANNELS>, B: SampleProcessor<CHANNELS>> {...}`,
    then it is **impossible** to accidentally create a chain with elements expecting a different number of
-   samples.  Moreover, since Rust monomorphizes generics, generating a version of the code for each constant
+   channels.  Moreover, since Rust monomorphizes generics, generating a version of the code for each constant
    value the compiler sees, that shifts the switching costs of *all decisions about which code path to
-   take **to compile time***.  Zero cost abstractions FTW.
+   take **to compile time***.  Zero cost abstractions FTW.  They are also useful for passing the band
+   being processed in multiband effects, which channel is being processed, and even buffer sizes correlated
+   to sample rates for delay and lookahead buffers. All of this trades small amount of code-complexity (a
+   const generic is still an argument, just one passed at compile time) for reduced runtime branching,
+   which is usually a worthwhile trade. 
  * Learn to live with ferocious generics signatures. Yes, you could write a DSP chain as a chain of
    `Box<dyn MyAudioProcessor + 'static>` where that's a trait.  But that adds a vtable lookup to every
    invocation, and erases type information you could use to make all sorts of easy-to-have bugs at runtime
