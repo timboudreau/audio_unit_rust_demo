@@ -299,6 +299,20 @@ might safe some false starts:
  is simply to `Box::leak` the allocated DSP processor, and provide a C-ABI call that accepts a pointer and
  deallocates it (as `crates/mock_dsp_lib/lib.rs` does).  It's going to be some code's responsibility to drop
  DSP processors, and only the C++ code has enough information to know when it's safe to do it.
+ * Learn to love Rust's [const-generics](https://practice.course.rs/generics-traits/const-generics.html). Const
+   generics are powerful tools for bug-prevention and performance.  For example, if you have a chain of
+   instances of a trait `SampleProcessor<const CHANNELS: u8>`, and an implementation that chains them
+   that is, say, `struct BiSampleProcessor<const CHANNELS: u8, A: SampleProcessor<CHANNELS>, B: SampleProcessor<CHANNELS>> {...}`,
+   then it is **impossible** to accidentally create a chain with elements expecting a different number of
+   samples.  Moreover, since Rust monomorphizes generics, generating a version of the code for each constant
+   value the compiler sees, that shifts the switching costs of *all decisions about which code path to
+   take **to compile time***.  Zero cost abstractions FTW.
+ * Learn to live with ferocious generics signatures. Yes, you could write a DSP chain as a chain of
+   `Box<dyn MyAudioProcessor + 'static>` where that's a trait.  But that adds a vtable lookup to every
+   invocation, and erases type information you could use to make all sorts of easy-to-have bugs at runtime
+   into compile-time errors and impossibilities at runtime.  And that is what Rust is **for**.  Type aliases
+   are helpful to write a large generic signature out once, and then use it via the alias in the rest of your
+   code, and also gives you a single place to refactor if you change it.
  * Apple's Audio Unit template contains a latent race-condition, where the audio unit can be deallocated
  while the render thread is still inside its render block. This only *really* starts to show up when
  you support presets and try to change the active preset during audio playback. Logic Pro will tear down
@@ -329,6 +343,9 @@ might safe some false starts:
     * If you have more than one, the type name of a C `struct` you return from processing functions (in my
       case, I have 4, 8 and 16 band processing result types because they embed input and output level
       metadata used by the UI to display levels on screen)
+    * Adhoc flags for things like if a parameter should not be modified in real-time because it will cause
+      audible artifacts, or one which is used by-value on Rust DSP processor creation and requires it to be
+      torn down and recreated (for example, lookahead buffers which use heap-allocated arrays for performance)
   * Write a code generation app which depends on every plugin *with that flag set*, which can read it and
   generate the appropriate code in the various languages
  * It appears that Apple's template Audio Units just black-holes any render observers passed to
@@ -339,7 +356,7 @@ might safe some false starts:
  you need to edit the generated `WhateverAudioUnit.mm` to report what it really does in several places - the
  `channels` argument to the initial format and `_outputBus.maximumChannelCount` in `setupAudioBuses()`, and
  as pairs of integers in the value returned from `channelCapabilities`. Failure to set all of these consistently can
- result in a plugin validation warning or failure.
+ result in a plugin validation warning or failure.  The code here is an example of setting a plugin to do stereo-only.
  * There does exist a crate with Rust bindings that could potentially let you create pure-Rust audio-units.
  Looking at it, it appears to have missed a bunch of fundamentals - for example, it hardcodes the plugin
  vendor to be Apple where a cursory read of the docs will tell you that the code the author could only
