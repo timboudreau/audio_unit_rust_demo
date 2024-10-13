@@ -488,10 +488,10 @@ Here are the steps I have used that work to achieve this, starting from a projec
   12. Make sure any (Rust or other) libraries in the framework project are set to *Do not Embed* (through
     black magic and auto-linking, the code you call will wind up statically linked into its binary)
   13. Set the following settings in the *framework* project's project settings:
-    * Build Libraries for Distribution - `YES`
-    * Allow Non-modular Includes In Framework Modules - `YES`
-    * Link Frameworks Automatically - `YES`
-    * Skip Install - `YES`
+     * Build Libraries for Distribution - `YES`
+     * Allow Non-modular Includes In Framework Modules - `YES`
+     * Link Frameworks Automatically - `YES`
+     * Skip Install - `YES`
   14. Set the *Copyright (Human Readable)* build setting for *each* target to something sane and non-empty,
     and the *Application Category* to `Music` (if unset, installer creation will fail)
   15. Set the *entitlements* for the application extension *and* framework to request *Audio Input*,
