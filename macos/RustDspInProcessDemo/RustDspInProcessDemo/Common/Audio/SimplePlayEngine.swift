@@ -61,7 +61,7 @@ public class SimplePlayEngine {
     private var file: AVAudioFile?
     
     // Whether we are playing.
-    private (set) var isPlaying = false
+    private(set) var isPlaying = false
     
     // This block will be called every render cycle and will receive MIDI events
     private let midiOutBlock: AUMIDIOutputEventBlock = { sampleTime, cable, length, data in return noErr }

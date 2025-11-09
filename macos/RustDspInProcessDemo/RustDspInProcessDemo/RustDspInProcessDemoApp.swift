@@ -9,7 +9,7 @@ class RustDspInProcessDemoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(hostModel: hostModel)
+            ContentView(hostModel: self.hostModel)
         }
     }
 }
