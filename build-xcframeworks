@@ -9,10 +9,10 @@ unset RUSTFLAGS
 
 # We will build against the least version of the SDK for THIS version of Mac OS
 # found on the local machine:
-TARGET_MACOSX_VER="13"
+export TARGET_MACOSX_VER="26"
 
 # Find the concrete sdk version - this is somewhat fragile:
-SDK_VER=$(xcodebuild -showsdks | grep macOS | grep -v Asset | grep "${TARGET_MACOSX_VER}" | sort | cut -b44- | tail -n1)
+export SDK_VER=$(xcodebuild -showsdks | grep macOS | grep -v Asset | grep "${TARGET_MACOSX_VER}" | sort | cut -b44- | tail -n1)
 
 # No SDK found - we will fail later if we don't abort here
 if [ -z "${SDK_VER}" ]; then
@@ -24,10 +24,10 @@ if [ -z "${SDK_VER}" ]; then
 fi
 
 # Use what we found to locate the linker and set up variables used by other build steps:
-SDK_ID="macosx${SDK_VER}"
-SDKROOT=$(xcrun -sdk ${SDK_ID} --show-sdk-path)
+export SDK_ID="macosx${SDK_VER}"
+export SDKROOT=$(xcrun -sdk ${SDK_ID} --show-sdk-path)
 export MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk ${SDK_ID} --show-sdk-platform-version)
-XCODE_DIR="$(xcode-select -p)"
+export XCODE_DIR="$(xcode-select -p)"
 LINKER_PATH="${XCODE_DIR}/usr/bin/ld"
 SDK_TARGET_VERSION="${MACOSX_DEPLOYMENT_TARGET}"
 
@@ -55,7 +55,7 @@ LINKER_FLAGS="-C link-arg=-dead_strip -C link-arg=-export_dynamic -C link-arg=-m
 BASE_RFLAGS="-C relocation-model=static -C embed-bitcode=no -C linker=${LINKER_PATH}"
 
 # Disable this for real releases - merged into RUSTFLAGS when building for the native host
-DEV_RUSTFLAGS="-C target-cpu=native"
+DEV_RUSTFLAGS=""
 
 # We build all our binaries for both architectures in release mode
 RELEASE_RUSTFLAGS="${BASE_RFLAGS} ${LINKER_FLAGS} ${EXPERIMENTAL_LLVM_FLAGS}"
@@ -194,9 +194,11 @@ build_one_xcframework() {
     CURR_LIB_HEADERS_DIR="${HEADERS_DIR}/${CURR_LIB_NAME}"
 
     echo "Build ${CURR_LIB_CRATE_NAME} for ${OTHER_TARGET}"
+
     cd "${ROOT}/crates/${CURR_LIB_CRATE_SUBPATH}" && RUSTFLAGS="${RELEASE_RUSTFLAGS_HOST}" cargo build ${CURR_LIB_FEATURES} --release --target=$OTHER_TARGET
 
     echo "Build ${CURR_LIB_CRATE_NAME} for ${MY_TARGET}"
+
     cd "${ROOT}/crates/${CURR_LIB_CRATE_SUBPATH}" && RUSTFLAGS="${RELEASE_RUSTFLAGS}" cargo build ${CURR_LIB_FEATURES} --release --target=$MY_TARGET
 
     UNIV_CURR_LIB_BINARY_DIR="${ROOT}/target/universal-${CURR_LIB_CRATE_NAME}"
