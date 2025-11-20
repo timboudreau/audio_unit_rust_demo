@@ -566,7 +566,7 @@ goes for error annotations in sources that were fixed many builds ago, but reapp
 from the first build that ran after Xcode started.
 
 
-### Things That Go Wrong
+### Things That Go Wrong And Their Fixes
 
  * *Provisioning profile "WhateverExtension" doesn't match the entitlements file's value for the 
    com.apple.application-identifier entitlement.* - what this cryptic message actually means (and there
@@ -584,7 +584,7 @@ from the first build that ran after Xcode started.
    project/application target for it to build. Ensure there is one - just go
    to Product > Scheme > New Scheme and it will be the default in the dialog that
    pops up - just press Enter.
- * Building the *installers* fails with a message like `ZenLimiter/install_root/ZenLimiter.app/Contents/PlugIns/ZenLimiterExtension.appex/Contents/Frameworks/ZenLimiterFramework.framework`:
+ * Building the *installers* fails with a message like `pkgbuild: error: Component path ".../ZenLimiter/install_root/ZenLimiter.app/Contents/PlugIns/ZenLimiterExtension.appex/Contents/Frameworks/ZenLimiterFramework.framework" does not exist.`:
    I have not tracked down the exact cause of this (it happens in some, but not all of my plugin projects), but the fix is, in the *application target*'s Build Phases | Embed Frameworks, to change
    the destination for the framework project from the default (in the combo box) of `Frameworks` to `Plugins and Foundation Extensions` (again, in that combo box) and add `Frameworks` to the
    *Subpath* field below it.  This took some digging to figure out - it ensures the framework is where the installer builder expects it to be underneath the application project; what is a
