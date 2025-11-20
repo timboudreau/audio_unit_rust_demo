@@ -589,8 +589,8 @@ from the first build that ran after Xcode started.
    the destination for the framework project from the default (in the combo box) of `Frameworks` to `Plugins and Foundation Extensions` (again, in that combo box) and add `Frameworks` to the
    *Subpath* field below it.  This took some digging to figure out - it ensures the framework is where the installer builder expects it to be underneath the application project; what is a
    mystery is why this is *not a problem* for some of my projects, but these tend to be the earliest ones created, so it may be an artifact of the Xcode build settings version they use. TBD.
-    * Note: This can also come up if you set the `Bundle display name` property in the `Info.plist` of your extension project to anything other than the default, e.g. `FooPluginExtension`.
-      The name of the `Info.plist` key suggests that this is just a user visible, localizable *display name* but it is actually used for the **directory name** the framework gets placed
+    * Note: This can also come up if you set the `Product Name` property in the settings of your extension project to anything other than the default, e.g. `FooPluginExtension`.
+      This is not just a , *display name* but it is used for the **directory name** the framework gets placed
       inside the application bundle - i.e. if you change it to "My Cool Plugin", your framework will now be under the app in `Contents/Plugins/My Cool Plugin.appex` which is not where
       Apple's installer generator will look for it.
    
