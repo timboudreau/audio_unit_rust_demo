@@ -448,7 +448,8 @@ Here are the steps I have used that work to achieve this, starting from a projec
       `WhateverExtensionAudioUnit.h`
     2. Find the build setting for the public modulemap and set it to the relative path using Apple's
       build variable dereferencing syntax, e.g. `$(SRCROOT)/WhateverFramework/public.modulemap`
-    3. Create a file `private.modulemap` mapping any headers from libraries (example below)
+    3. Create a file `private.modulemap` mapping any headers from libraries (example below), and set
+      the project's private modulemap to that file using the `$(SRCROOT)` alias as in the previous step.
     4. Find the build setting for the private module map and do likewise for it.  Note the naming in the
       module map files is strict - i.e. `WhateverFramework` and `WhateverFramework_Private` in the first
       line that names the module. This accomplishes the same thing as the *Objective C Bridging Header*
@@ -464,7 +465,8 @@ Here are the steps I have used that work to achieve this, starting from a projec
       `Combine` where it did not before, and you may get some warnings about closed enums defined in the
       same source file possibly growing new members and switches over their members not having a default
       branch. I do not know the reason the Swift compiler behaves differently, but these are all easy
-      enough to fix.
+      enough to fix (edit: perhaps because my newly created framework projects as I worked all of this
+      out over a couple weeks were set to use a newer version of Swift).
     7. When importing from a module-map, the compiler will now complain if the header files for your
       libraries use quotes instead of angle-brackets for `include` statements.  If you are using the
       `cbindgen-bindgen` code from this project, simply add an empty file named `hack_cbindgen_includes`
@@ -475,7 +477,8 @@ Here are the steps I have used that work to achieve this, starting from a projec
      that points to the framework
   7. As described in the docs linked above, create an empty Swift source file with a single empty function
      in it, in the extension project's sources. If you're feeling saucy, name it something like
-    `xcodebuild_is_a_bag_of_steve_jobs_ossified_turds()`.
+    `xcodebuild_is_a_bag_of_steve_jobs_ossified_turds()`. Xcodebuild insists that the compiler have **something**
+     to compile, even if it's pointless.
   8. Add that one source file to the Compile Sources phase of the application extension
   9. Update the `Info.plist` for the extension project adding a key in `NSExtensionAttributes` named
      `AudioComponentBundle` with the string value of the *framework* project's bundle-id
@@ -581,6 +584,11 @@ from the first build that ran after Xcode started.
    project/application target for it to build. Ensure there is one - just go
    to Product > Scheme > New Scheme and it will be the default in the dialog that
    pops up - just press Enter.
+ * Building the *installers* fails with a message like `ZenLimiter/install_root/ZenLimiter.app/Contents/PlugIns/ZenLimiterExtension.appex/Contents/Frameworks/ZenLimiterFramework.framework`:
+   I have not tracked down the exact cause of this (it happens in some, but not all of my plugin projects), but the fix is, in the *application target*'s Build Phases | Embed Frameworks, to change
+   the destination for the framework project from the default (in the combo box) of `Frameworks` to `Plugins and Foundation Extensions` (again, in that combo box) and add `Frameworks` to the
+   *Subpath* field below it.  This took some digging to figure out - it ensures the framework is where the installer builder expects it to be underneath the application project; what is a
+   mystery is why this is *not a problem* for some of my projects, but these tend to be the earliest ones created, so it may be an artifact of the Xcode build settings version they use. TBD.
    
 
 Misc Audio Unit Build, Run and Registration Quirks
